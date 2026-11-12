@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FluoroLoop | PFAS Treatment & Fluorine Fate Simulator</title>
+<meta name="description" content="FluoroLoop is a research-informed educational PFAS treatment and fluorine fate simulator. Numeric results are illustrative, with linked EPA, ITRC, and peer-reviewed scientific sources.">
+<style>
+:root{
+  --bg:#050710;
+  --glass:rgba(255,255,255,.035);
+  --glass2:rgba(255,255,255,.06); --panel:#0f1426; --panel2:#151b31; --text:#f7f9ff; --muted:#a8b1cc;
+  --violet:#9b7cff; --violet2:#6d5cff; --mint:#73e8b8; --cyan:#6edcff; --amber:#ffc96e;
+  --rose:#ff8aa8; --red:#ff6f7d; --line:rgba(255,255,255,.10); --shadow:0 28px 95px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+::selection{background:rgba(155,124,255,.35);color:#fff}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:#070914}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--violet),var(--mint));border-radius:999px;border:2px solid #070914}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--text);
+  min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 12% 4%,rgba(109,92,255,.22),transparent 28%),
+    radial-gradient(circle at 88% 18%,rgba(115,232,184,.10),transparent 24%),
+    linear-gradient(180deg,#060814,#050710 50%,#070a13);
+}
+button,input,select{font:inherit} button{cursor:pointer}
+.shell{max-width:1280px;margin:auto;padding:0 24px}
+nav{position:sticky;top:0;z-index:60;background:rgba(5,7,16,.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.navInner{max-width:1280px;margin:auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:900}.mark{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--violet),#7f5cff 60%,var(--mint));box-shadow:0 0 34px rgba(155,124,255,.28)}.brandName{font-size:20px;background:linear-gradient(90deg,#fff,#cabaff);-webkit-background-clip:text;color:transparent}
+.navLinks{display:flex;align-items:center;gap:7px}.navBtn{border:1px solid transparent;background:transparent;color:#cbd2e8;padding:9px 12px;border-radius:11px;font-size:13px;font-weight:800}.navBtn:hover,.navBtn.active{background:rgba(155,124,255,.11);border-color:rgba(155,124,255,.18);color:white}
+.badge{padding:7px 10px;border-radius:999px;border:1px solid rgba(115,232,184,.2);background:rgba(115,232,184,.09);color:var(--mint);font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+
+.hero{min-height:74vh;display:grid;grid-template-columns:1.1fr .9fr;gap:44px;align-items:center;padding:68px 0 34px}
+.eyebrow{color:var(--mint);font-size:11px;font-weight:900;letter-spacing:.17em;text-transform:uppercase}
+h1{font-size:clamp(58px,8vw,108px);line-height:.88;letter-spacing:-.065em;margin:14px 0 18px}.grad{background:linear-gradient(95deg,#fff,#c2adff 54%,#79e9bb);-webkit-background-clip:text;color:transparent}
+.hero p{max-width:760px;color:#c4cbe2;font-size:clamp(17px,2vw,22px);line-height:1.55}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.btn{border:1px solid var(--line);background:rgba(255,255,255,.035);color:#fff;border-radius:15px;padding:13px 18px;font-weight:850;transition:.2s}.btn:hover{transform:translateY(-2px);border-color:rgba(155,124,255,.4)}.btn.primary{border:0;background:linear-gradient(95deg,var(--violet),#b28cff);color:#070914;box-shadow:0 16px 36px rgba(155,124,255,.24)}.btn.small{padding:9px 12px;font-size:12px}
+.heroCard{border:1px solid rgba(155,124,255,.3);border-radius:30px;background:linear-gradient(150deg,rgba(24,29,61,.9),rgba(8,11,26,.94));padding:25px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.heroCard:before{content:"";position:absolute;inset:-42% 12% 52% -28%;background:radial-gradient(circle,rgba(115,232,184,.15),transparent 58%)}
+.heroViz{height:265px;display:grid;place-items:center;position:relative}
+.core{width:126px;height:126px;border-radius:50%;display:grid;place-items:center;font-size:46px;font-weight:950;border:2px solid rgba(115,232,184,.66);background:rgba(115,232,184,.055);box-shadow:0 0 65px rgba(115,232,184,.12)}
+.orbit{position:absolute;width:230px;height:114px;border:1px solid rgba(196,180,255,.26);border-radius:50%;animation:spin 15s linear infinite}.orbit.o2{transform:rotate(73deg);animation-duration:18s}
+.e{position:absolute;width:17px;height:17px;border-radius:50%;background:var(--violet);box-shadow:0 0 22px var(--violet)}.e1{left:44px;top:50px}.e2{right:46px;bottom:50px;background:var(--mint);box-shadow:0 0 22px var(--mint)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.heroStats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.heroStat{padding:12px;border-radius:15px;border:1px solid var(--line);background:rgba(255,255,255,.034)}.heroStat b{display:block;font-size:18px}.heroStat span{font-size:10px;color:var(--muted)}
+
+section{padding:62px 0}.sectionHead{display:flex;justify-content:space-between;gap:24px;align-items:end;margin-bottom:24px}h2{margin:0;font-size:clamp(34px,4.4vw,54px);letter-spacing:-.045em}.sectionHead p{max-width:660px;margin:0;color:var(--muted);line-height:1.6}
+.panel{border:1px solid var(--line);background:linear-gradient(150deg,rgba(18,23,46,.9),rgba(9,12,28,.91));border-radius:24px;box-shadow:var(--shadow)}
+.presetRow{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}.preset{padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.025);color:#ccd3e7;font-size:11px;font-weight:800}.preset:hover{border-color:rgba(155,124,255,.35);color:white}
+.simGrid{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px}.controls,.results{padding:24px}
+label{display:block;margin:16px 0 7px;font-size:12px;font-weight:800;color:#cbd2e6}
+select,input[type=number]{width:100%;padding:12px 13px;border-radius:13px;border:1px solid var(--line);background:#0a0e20;color:white;outline:none}
+input[type=range]{width:100%;accent-color:var(--violet)}
+.twoCol{display:grid;grid-template-columns:1fr 1fr;gap:11px}.priorityGrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.priorityBox{padding:12px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid var(--line)}.priorityBox label{margin-top:0}
+.runRow{display:flex;gap:9px;margin-top:18px}.runRow .btn{flex:1}
+
+.resultTop{display:flex;justify-content:space-between;gap:18px;align-items:center}.resultName{font-size:31px;margin:7px 0 8px}.resultDesc{color:var(--muted);line-height:1.5;margin:0}
+.scoreRing{width:114px;height:114px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--mint) 0 82%,rgba(255,255,255,.07) 82% 100%);position:relative;flex:0 0 auto}.scoreRing:after{content:"";position:absolute;inset:10px;border-radius:50%;background:#10152c}.scoreRing b{z-index:1;font-size:30px}
+.scorePair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.scoreBox{padding:15px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.026)}.scoreBox .big{font-size:28px;font-weight:950}.scoreBox .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.metricGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.metric{padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.026)}.metricTop{display:flex;justify-content:space-between;font-size:11px;gap:8px}.bar{height:8px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden;margin-top:8px}.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--violet),var(--mint));transition:.4s}
+.whyBox{margin-top:14px;padding:14px;border-radius:15px;background:rgba(111,220,255,.05);border:1px solid rgba(111,220,255,.16);color:#cfdaea;font-size:12px;line-height:1.55}.uncertainty{margin-top:10px;padding:12px;border-radius:14px;background:rgba(255,201,110,.055);border:1px solid rgba(255,201,110,.17);font-size:12px;color:#e6d5af}
+
+.methodGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.methodCard{border:1px solid var(--line);background:rgba(255,255,255,.026);border-radius:18px;padding:17px;transition:.2s}.methodCard:hover{transform:translateY(-4px);border-color:rgba(155,124,255,.4)}.methodCard.selected{border-color:rgba(115,232,184,.52);box-shadow:0 0 0 1px rgba(115,232,184,.09) inset}
+.tag{display:inline-block;padding:6px 9px;border-radius:999px;background:rgba(155,124,255,.1);color:#cabaff;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.methodCard h4{margin:9px 0 6px;font-size:17px}.methodCard p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}.scoresMini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}.scoresMini div{padding:8px;border-radius:10px;background:rgba(255,255,255,.032);font-size:10px;color:var(--muted)}.scoresMini b{display:block;color:white;font-size:13px;margin-top:2px}
+
+.comparePanel{padding:20px}.compareTop{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:13px}.triple{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.compareCard{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(255,255,255,.026)}.compareCard h4{margin:0 0 10px}.compareRow{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);padding:7px 0;font-size:11px}.compareRow:last-child{border-bottom:0}.compareRow b{color:white}
+
+.fateGrid{display:grid;grid-template-columns:.82fr 1.18fr;gap:18px}.passport,.flowPanel{padding:21px}.passportHeader{display:flex;justify-content:space-between;gap:12px;align-items:start}.passport h3{margin:5px 0 4px}.passport small{color:var(--muted)}.passportRows{display:grid;gap:9px;margin-top:17px}.passportRow{display:flex;justify-content:space-between;gap:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}.passportRow:last-child{border-bottom:0}
+.circularity{margin-top:17px;padding:14px;border-radius:15px;background:rgba(115,232,184,.055);border:1px solid rgba(115,232,184,.16)}.circularity b{font-size:24px;color:var(--mint)}
+.flowSvgWrap{margin-top:12px;border:1px solid var(--line);border-radius:18px;padding:14px;background:rgba(255,255,255,.02)}
+svg{width:100%;height:auto}.nodeText{font-size:14px;font-weight:800;fill:#f8f9ff}.smallText{font-size:11px;fill:#a8b1cc}.link{fill:none;stroke-linecap:round;opacity:.8;transition:.5s}.link.recover{stroke:var(--mint)}.link.inorg{stroke:var(--cyan)}.link.resid{stroke:var(--amber)}.link.unc{stroke:var(--rose)}
+
+.historyGrid{display:grid;grid-template-columns:.7fr 1.3fr;gap:18px}.historyPanel{padding:18px}.historyList{display:grid;gap:9px}.historyItem{padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.025);font-size:11px}.historyItem b{display:block;font-size:13px;margin-bottom:4px}.historyItem span{color:var(--muted)}
+.judgeGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}.judgeCard{padding:17px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.025)}.judgeCard .ico{font-size:25px;margin-bottom:16px}.judgeCard h4{margin:0 0 6px}.judgeCard p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}.modal.show{display:flex}.modalCard{max-width:640px;width:100%;padding:24px;border-radius:24px;background:#10152b;border:1px solid var(--line);box-shadow:var(--shadow)}.modalCard h3{margin-top:0}.modalCard p{color:var(--muted);line-height:1.6}.modalActions{display:flex;justify-content:flex-end;margin-top:16px}
+.toast{position:fixed;right:20px;bottom:20px;z-index:90;display:none;max-width:360px;padding:13px 15px;background:#12172d;border:1px solid rgba(115,232,184,.24);border-radius:14px;box-shadow:var(--shadow);font-size:12px;color:#dcf9ed}.toast.show{display:block}
+
+.evidenceGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.evidenceCard{padding:18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.026)}
+.evidenceCard h4{margin:8px 0 6px}.evidenceCard p{margin:0;color:var(--muted);font-size:11px;line-height:1.55}
+.evidenceMeta{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.metaPill{padding:6px 8px;border-radius:999px;background:rgba(155,124,255,.1);color:#cdbfff;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.confidenceStrip{margin-top:16px;padding:14px;border:1px solid rgba(111,220,255,.16);background:rgba(111,220,255,.045);border-radius:15px}
+.rangeBar{height:10px;background:rgba(255,255,255,.07);border-radius:999px;position:relative;overflow:hidden;margin-top:8px}
+.rangeBand{position:absolute;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,rgba(155,124,255,.5),rgba(115,232,184,.75))}
+.rangeDot{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);box-shadow:0 0 12px rgba(255,255,255,.7)}
+.onboard{position:fixed;inset:0;z-index:120;background:rgba(4,6,14,.86);backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:center;padding:20px}
+.onboard.hide{display:none}
+.onboardCard{max-width:760px;width:100%;padding:28px;border-radius:28px;background:linear-gradient(150deg,#11172f,#090d1f);border:1px solid rgba(155,124,255,.28);box-shadow:var(--shadow)}
+.onboardSteps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.onboardStep{padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)}
+.onboardStep b{display:block;margin-bottom:5px}.onboardStep span{font-size:11px;color:var(--muted);line-height:1.45}
+.kpiRibbon{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px}
+.kpi{padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.kpi strong{display:block;font-size:20px}.kpi span{font-size:10px;color:var(--muted)}
+.explainPanel{margin-top:14px;padding:15px;border-radius:15px;border:1px solid rgba(155,124,255,.2);background:rgba(155,124,255,.05)}
+.explainPanel h4{margin:0 0 8px}.explainPanel p{margin:0;color:#cdd4e8;font-size:12px;line-height:1.55}
+
+.demoRail{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 4px}
+.demoStep{position:relative;padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025);overflow:hidden}
+.demoStep:before{content:"";position:absolute;inset:auto 0 0 0;height:3px;background:linear-gradient(90deg,var(--violet),var(--mint));opacity:.25}
+.demoStep.active{border-color:rgba(155,124,255,.45);background:rgba(155,124,255,.07)}
+.demoStep.active:before{opacity:1}
+.demoStep b{display:block;font-size:12px;margin-bottom:4px}.demoStep span{font-size:10px;color:var(--muted);line-height:1.45}
+.insightGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.insight{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}
+.insight .label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900}
+.insight .value{font-size:18px;font-weight:950;margin-top:4px}
+.insight .sub{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.45}
+.rankBar{display:grid;grid-template-columns:140px 1fr 42px;gap:10px;align-items:center;margin:9px 0;font-size:11px}
+.rankTrack{height:10px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
+.rankTrack div{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--violet),var(--mint));transition:.45s}
+.finalCallout{margin-top:16px;padding:16px;border-radius:17px;border:1px solid rgba(115,232,184,.22);background:linear-gradient(135deg,rgba(115,232,184,.06),rgba(155,124,255,.05))}
+.finalCallout h4{margin:0 0 7px}.finalCallout p{margin:0;color:#cdd5e8;font-size:12px;line-height:1.55}
+.storyPanel{padding:20px}
+.storyGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.storyCard{padding:16px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.025)}
+.storyCard h4{margin:0 0 7px}.storyCard p{margin:0;color:var(--muted);font-size:11px;line-height:1.55}
+.demoControls{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.heroFloat{animation:float 5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fadeIn{animation:fade .4s ease}
+@keyframes fade{from{opacity:.35;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.radarCostGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;margin-top:18px}
+.radarPanel,.economicsPanel{padding:18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}
+.radarWrap{display:grid;place-items:center;min-height:320px}
+.radarWrap svg{max-width:390px}
+.radarAxis{stroke:rgba(255,255,255,.15);stroke-width:1}
+.radarRing{fill:none;stroke:rgba(255,255,255,.08);stroke-width:1}
+.radarShape{fill:rgba(155,124,255,.22);stroke:var(--violet);stroke-width:2.2;filter:drop-shadow(0 0 14px rgba(155,124,255,.18));transition:.45s}
+.radarPoint{fill:var(--mint);stroke:#07110d;stroke-width:2}
+.radarLabel{font-size:10px;fill:#b8c0da;font-weight:700}
+.econGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.econCard{padding:14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+.econCard .lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900}
+.econCard .val{font-size:22px;font-weight:950;margin-top:4px}
+.econCard .sub{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4}
+.scale{display:flex;gap:5px;margin-top:8px}
+.scale span{height:6px;flex:1;border-radius:999px;background:rgba(255,255,255,.08)}
+.scale span.on{background:linear-gradient(90deg,var(--violet),var(--mint))}
+.challengePanel{margin-top:18px;padding:18px;border:1px solid rgba(255,201,110,.2);background:linear-gradient(135deg,rgba(255,201,110,.055),rgba(155,124,255,.04));border-radius:18px}
+.challengeHead{display:flex;justify-content:space-between;gap:14px;align-items:center}
+.challengeResult{margin-top:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,.028);border:1px solid var(--line);font-size:12px;line-height:1.55;color:#d7dceb}
+.challengeResult strong{color:#fff}
+.sensitivityGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.sensCard{padding:11px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.025)}
+.sensCard b{display:block;font-size:13px;margin-bottom:3px}.sensCard span{font-size:9px;color:var(--muted);line-height:1.35}
+@media(max-width:1000px){.radarCostGrid{grid-template-columns:1fr}.sensitivityGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.econGrid,.sensitivityGrid{grid-template-columns:1fr}.challengeHead{align-items:stretch;flex-direction:column}}
+
+
+.aiGrid{display:grid;grid-template-columns:.92fr 1.08fr;gap:16px}
+.aiComposer,.aiResponse,.hardwarePanel{padding:20px}
+.promptBox{width:100%;min-height:105px;resize:vertical;padding:14px;border-radius:14px;border:1px solid var(--line);background:#0a0e20;color:#fff;outline:none}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.chip{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.025);color:#cdd4e8;font-size:10px;font-weight:800}
+.aiAnswer{min-height:180px;padding:16px;border-radius:16px;border:1px solid rgba(111,220,255,.18);background:rgba(111,220,255,.04);color:#d8dfef;line-height:1.6;font-size:12px}
+.contextPacket{margin-top:12px;padding:13px;border-radius:14px;background:#090d1c;border:1px solid var(--line);font-size:10px;color:#aeb8d2;line-height:1.55;white-space:pre-wrap}
+.hardwareGrid{display:grid;grid-template-columns:.85fr 1.15fr;gap:16px}
+.sensorGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sensor{padding:13px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.026)}
+.sensor label{margin-top:0}.sensorValue{font-size:18px;font-weight:950}
+.hwStatus{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.hwStat{padding:11px;border-radius:12px;background:rgba(255,255,255,.028);border:1px solid var(--line)}
+.hwStat b{display:block;font-size:14px}.hwStat span{font-size:9px;color:var(--muted)}
+.arch{padding:14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
+.arch svg{width:100%;height:auto}
+.bom{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+.bomItem{padding:10px;border-radius:11px;background:rgba(255,255,255,.027);border:1px solid var(--line);font-size:10px}
+.hwAlert{margin-top:12px;padding:12px;border-radius:13px;border:1px solid rgba(255,201,110,.18);background:rgba(255,201,110,.05);font-size:11px;color:#ead9b4}
+.a11y{font-size:108%}.a11y *{animation:none!important;transition:none!important}
+.a11y .panel,.a11y .methodCard,.a11y .evidenceCard,.a11y .storyCard{border-color:rgba(255,255,255,.28)}
+@media(max-width:1000px){.aiGrid,.hardwareGrid{grid-template-columns:1fr}}
+@media(max-width:650px){.sensorGrid,.bom,.hwStatus{grid-template-columns:1fr}}
+
+
+:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
+.productStrip{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:18px}
+.productBadge{padding:11px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.026);text-align:center}
+.productBadge b{display:block;font-size:11px}.productBadge span{display:block;font-size:9px;color:var(--muted);margin-top:3px}
+.validationGrid{display:grid;grid-template-columns:.95fr 1.05fr;gap:16px}
+.testList{display:grid;gap:8px;margin-top:12px}
+.testRow{display:flex;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025);font-size:11px}
+.statusGood{color:var(--mint);font-weight:900}.statusWarn{color:var(--amber);font-weight:900}
+.docsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.docCard{padding:14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.026)}
+.docCard b{display:block;font-size:12px;margin-bottom:5px}.docCard span{font-size:10px;color:var(--muted);line-height:1.45}
+.pitchPanel{padding:20px}
+.pitchTimeline{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:14px}
+.pitchBeat{padding:13px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.025)}
+.pitchBeat strong{font-size:11px}.pitchBeat p{font-size:9px;color:var(--muted);line-height:1.4;margin:5px 0 0}
+.deepDiveModal{position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.74);display:none;align-items:center;justify-content:center;padding:20px}
+.deepDiveModal.show{display:flex}
+.deepDiveCard{width:min(880px,100%);max-height:90vh;overflow:auto;padding:24px;border-radius:26px;background:#10152b;border:1px solid var(--line);box-shadow:var(--shadow)}
+.deepDiveGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.deepItem{padding:13px;border-radius:13px;border:1px solid var(--line);background:rgba(255,255,255,.025)}
+.deepItem b{display:block;font-size:11px;margin-bottom:4px}.deepItem span{font-size:10px;color:var(--muted);line-height:1.45}
+.reportPreview{padding:14px;border-radius:15px;border:1px solid rgba(115,232,184,.18);background:rgba(115,232,184,.045);margin-top:14px;font-size:11px;color:#d4e8df;line-height:1.55}
+.modelBoundary{padding:14px;border-radius:15px;border:1px solid rgba(255,138,168,.18);background:rgba(255,138,168,.04);margin-top:12px;font-size:11px;color:#e6ccd4;line-height:1.55}
+@media(max-width:1000px){.productStrip{grid-template-columns:repeat(2,1fr)}.validationGrid{grid-template-columns:1fr}.docsGrid{grid-template-columns:1fr 1fr}.pitchTimeline{grid-template-columns:1fr 1fr}.deepDiveGrid{grid-template-columns:1fr}}
+@media(max-width:650px){.productStrip,.docsGrid,.pitchTimeline{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}}
+
+footer{margin-top:34px;border-top:1px solid var(--line);padding:30px 0 46px;text-align:center;color:#77809a;font-size:11px}
+
+
+
+@media(max-width:1000px){.hero,.simGrid,.fateGrid,.historyGrid{grid-template-columns:1fr}.methodGrid{grid-template-columns:repeat(2,1fr)}.judgeGrid{grid-template-columns:repeat(2,1fr)}.metricGrid{grid-template-columns:repeat(2,1fr)}.triple{grid-template-columns:1fr}.evidenceGrid{grid-template-columns:1fr 1fr}.onboardSteps{grid-template-columns:1fr}.demoRail{grid-template-columns:1fr 1fr}.insightGrid{grid-template-columns:1fr 1fr}.storyGrid{grid-template-columns:1fr}.navLinks .navBtn{display:none}}
+@media(max-width:650px){.heroStats,.methodGrid,.judgeGrid,.metricGrid,.priorityGrid,.twoCol,.scorePair,.evidenceGrid,.kpiRibbon,.demoRail,.insightGrid{grid-template-columns:1fr}.resultTop{align-items:flex-start}.compareTop{flex-direction:column;align-items:stretch}h1{font-size:58px}}
+
+
+/* === REVISION 2: INTERACTION + MOTION PASS === */
+:root{--ease-out:cubic-bezier(.22,1,.36,1);--ease-spring:cubic-bezier(.16,1.35,.35,1)}
+section{opacity:1;transform:none}
+.motion-ready section:not(.hero){opacity:0;transform:translateY(24px);transition:opacity .72s var(--ease-out),transform .72s var(--ease-out)}
+.motion-ready section.reveal{opacity:1;transform:none}
+.btn,.preset,.navBtn,.methodCard,.compareCard,.evidenceCard,.aiCard,.hardwareCard,.validationCard{transition:transform .22s var(--ease-out),border-color .22s ease,background .22s ease,box-shadow .22s ease,opacity .22s ease}
+.btn:hover,.preset:hover{transform:translateY(-2px)}
+.btn:active,.preset:active{transform:translateY(0) scale(.98)}
+.methodCard:hover,.compareCard:hover{transform:translateY(-5px);border-color:rgba(155,124,255,.34);box-shadow:0 22px 55px rgba(0,0,0,.24)}
+.methodCard.selected{animation:selectedPulse .55s var(--ease-spring)}
+@keyframes selectedPulse{0%{transform:scale(.985)}55%{transform:scale(1.012)}100%{transform:scale(1)}}
+.resultPanel.is-updating{animation:resultFlash .55s var(--ease-out)}
+@keyframes resultFlash{0%{transform:translateY(3px);filter:brightness(.9)}55%{transform:translateY(-2px);filter:brightness(1.12)}100%{transform:none;filter:none}}
+.passport{position:relative;overflow:hidden;isolation:isolate}
+.passport::before{content:"";position:absolute;inset:-1px;z-index:-1;border-radius:inherit;background:radial-gradient(circle at 90% 8%,rgba(115,232,184,.16),transparent 30%),radial-gradient(circle at 5% 100%,rgba(155,124,255,.16),transparent 34%);opacity:.75}
+.passport.passport-reveal{animation:passportReveal .72s var(--ease-spring)}
+@keyframes passportReveal{0%{opacity:.45;transform:perspective(900px) rotateX(4deg) translateY(14px) scale(.985)}100%{opacity:1;transform:none}}
+.passportRow b,.circularity>b{display:inline-block;min-width:38px;font-variant-numeric:tabular-nums}
+.flowSvgWrap svg{overflow:visible}
+.link{stroke-linecap:round;filter:url(#glow);opacity:.82;transition:stroke-width .5s var(--ease-out),opacity .25s ease}
+.link.flowing{stroke-dasharray:18 14;animation:dashFlow 1.05s linear infinite,flowGlow .9s ease-in-out infinite alternate}
+@keyframes dashFlow{to{stroke-dashoffset:-64}}
+@keyframes flowGlow{from{opacity:.5}to{opacity:1}}
+.flowSvgWrap.pulse{animation:flowPanelPulse .7s var(--ease-out)}
+@keyframes flowPanelPulse{0%{transform:scale(.995)}55%{transform:scale(1.006)}100%{transform:none}}
+.rankTrack>div{transition:width .72s var(--ease-out)}
+.metricFill,.barFill,[style*="width:"]{transition:width .65s var(--ease-out)}
+.modal{transition:opacity .22s ease,visibility .22s ease}
+.modal.show .modalCard{animation:modalPop .42s var(--ease-spring)}
+@keyframes modalPop{0%{opacity:0;transform:translateY(18px) scale(.97)}100%{opacity:1;transform:none}}
+.judgeProgress{height:5px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:18px 0 4px}
+.judgeProgress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--mint));border-radius:inherit}
+.modal.show .judgeProgress>i{animation:judgeTimer 8s linear forwards}
+@keyframes judgeTimer{to{width:100%}}
+.demoStep.active{animation:demoFocus .45s var(--ease-spring)}
+@keyframes demoFocus{0%{transform:scale(.97);opacity:.7}100%{transform:none;opacity:1}}
+.heroFloat{animation:heroDrift 7s ease-in-out infinite}
+@keyframes heroDrift{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@media(prefers-reduced-motion:reduce){.motion-ready section:not(.hero){opacity:1!important;transform:none!important}.heroFloat,.link.flowing,.modal.show .judgeProgress>i{animation:none!important}}
+
+
+/* Revision 3 — competition polish */
+.credStrip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 18px;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:20px;background:rgba(255,255,255,.025);box-shadow:0 20px 70px rgba(0,0,0,.18)}
+.credStrip>div{padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.022);min-width:0}.credStrip b{display:block;font-size:12px;margin-bottom:4px}.credStrip span{display:block;color:var(--muted);font-size:11px;line-height:1.45}
+#simulator{scroll-margin-top:88px;position:relative;border:1px solid rgba(155,124,255,.22);border-radius:30px;padding:30px;background:linear-gradient(155deg,rgba(18,22,45,.52),rgba(7,10,23,.18));box-shadow:0 34px 110px rgba(0,0,0,.25)}
+#simulator:before{content:"CORE EXPERIENCE";position:absolute;top:-11px;left:28px;padding:5px 9px;border-radius:999px;background:#0b1022;border:1px solid rgba(115,232,184,.24);color:var(--mint);font-size:9px;font-weight:950;letter-spacing:.15em}
+.navLinks .navBtn[onclick*="openJudge"]{border-color:rgba(115,232,184,.2);background:rgba(115,232,184,.06);color:#dff9ee}
+.resultName{letter-spacing:-.025em}.panel{backdrop-filter:blur(12px)}
+#fate .passport{outline:1px solid rgba(115,232,184,.09);box-shadow:0 20px 70px rgba(0,0,0,.24),0 0 50px rgba(115,232,184,.035)}
+.finalCallout{border-color:rgba(115,232,184,.22)!important;background:linear-gradient(135deg,rgba(115,232,184,.07),rgba(155,124,255,.05))!important}
+footer{line-height:1.7}
+@media(max-width:800px){.credStrip{grid-template-columns:1fr}.credStrip>div{padding:12px 14px}#simulator{padding:20px;border-radius:24px}}
+
+</style>
+
+<style id="rev1-visual-overrides">
+/* Revision 1 — visual hierarchy, spacing, hero, nav, simulator emphasis */
+:root{
+  --bg:#05070d;
+  --panel:#0d1220;
+  --panel2:#131a2c;
+  --line:rgba(255,255,255,.085);
+  --violet:#9a7cff;
+  --mint:#75e8ba;
+  --cyan:#74dfff;
+  --text:#f7f9ff;
+  --muted:#9da8c2;
+}
+body{
+  background:
+    radial-gradient(circle at 18% 8%,rgba(112,80,255,.20),transparent 30%),
+    radial-gradient(circle at 82% 18%,rgba(89,231,184,.08),transparent 24%),
+    linear-gradient(180deg,#060914 0%,#05070d 48%,#060912 100%);
+}
+.shell{max-width:1180px;padding:0 28px}
+nav{background:rgba(5,7,13,.72);border-bottom:1px solid rgba(255,255,255,.07);box-shadow:0 10px 40px rgba(0,0,0,.14)}
+.navInner{max-width:1180px;padding:12px 28px}
+.brandName{font-size:19px;letter-spacing:-.02em}
+.mark{width:36px;height:36px;border-radius:12px;box-shadow:0 0 26px rgba(155,124,255,.20)}
+.navLinks{gap:4px}
+.navBtn{padding:8px 10px;font-size:12px;border-radius:10px;color:#b9c2d9}
+.navBtn:nth-of-type(5),
+.navBtn:nth-of-type(6),
+.navBtn:nth-of-type(7),
+.navBtn:nth-of-type(8){display:none}
+.badge{font-size:10px;padding:7px 9px;opacity:.8}
+
+.hero{
+  min-height:680px;
+  display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:72px;
+  padding:92px 0 72px;
+}
+.hero h1{font-size:clamp(58px,7vw,92px);line-height:.98;letter-spacing:-.055em;max-width:760px;margin:12px 0 22px}
+.hero p{font-size:18px;line-height:1.7;max-width:650px;color:#aeb7cf}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#a99bff}
+.actions{gap:12px;margin-top:30px}
+.btn{border-radius:14px;padding:13px 17px;font-weight:800;box-shadow:none}
+.btn.primary{box-shadow:0 12px 36px rgba(109,92,255,.22)}
+.heroCard{
+  border:1px solid rgba(255,255,255,.10);
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
+  border-radius:30px;padding:30px;
+  box-shadow:0 28px 90px rgba(0,0,0,.36);
+  backdrop-filter:blur(18px);
+}
+.heroFloat{transform:translateY(-4px)}
+.heroViz{min-height:300px}
+.heroStats{gap:10px;margin-top:18px}
+.heroStat{padding:15px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06)}
+.heroStat b{font-size:22px}
+.heroStat span{font-size:11px;color:#97a3be}
+
+section{scroll-margin-top:92px}
+.sectionHead{margin-bottom:24px;align-items:end}
+.sectionHead h2{font-size:40px;letter-spacing:-.035em;margin-top:6px}
+.sectionHead p{max-width:560px;line-height:1.6}
+
+#simulator{
+  margin-top:24px;
+  padding:38px;
+  border-radius:32px;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.022));
+  border:1px solid rgba(155,124,255,.20);
+  box-shadow:0 36px 110px rgba(0,0,0,.28),0 0 0 1px rgba(255,255,255,.015) inset;
+}
+#simulator .sectionHead{margin-bottom:18px}
+.demoRail{gap:10px;margin:18px 0}
+.demoStep{background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.07);border-radius:15px;padding:14px}
+.demoStep.active{background:rgba(155,124,255,.10);border-color:rgba(155,124,255,.22)}
+.presetRow{gap:8px;margin-bottom:18px}
+.preset{border-radius:12px;background:rgba(255,255,255,.035)}
+.simGrid{gap:18px}
+.controlPanel,.resultPanel,.fatePanel,.passport,.compareCard,.methodCard,.evidenceCard,.aiCard,.hardwareCard,.validationCard{
+  border-radius:22px!important;
+  border-color:rgba(255,255,255,.075)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02))!important;
+  box-shadow:none!important;
+}
+.controlPanel{padding:22px!important}
+.resultPanel{padding:24px!important}
+
+input,select{border-radius:12px!important;background:#0b1020!important;border:1px solid rgba(255,255,255,.09)!important}
+input:focus,select:focus{outline:2px solid rgba(155,124,255,.28);border-color:rgba(155,124,255,.45)!important}
+
+.metricGrid,.methodGrid,.judgeGrid,.evidenceGrid,.insightGrid{gap:14px}
+.metricCard,.methodCard,.judgeCard,.evidenceCard,.insightCard{padding:18px!important}
+
+#compare,#fate,#aiLab,#hardware,#validation,#evidence{padding-top:72px}
+#compare .sectionHead,#fate .sectionHead,#aiLab .sectionHead,#hardware .sectionHead,#validation .sectionHead,#evidence .sectionHead{padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06)}
+
+footer{margin-top:72px;padding:28px 0 42px;color:#69738b;border-top:1px solid rgba(255,255,255,.06)}
+
+@media(max-width:1000px){
+  .hero{grid-template-columns:1fr;gap:34px;min-height:auto;padding-top:64px}
+  .heroCard{max-width:720px}
+  .navLinks .navBtn{display:none!important}
+  .navLinks .navBtn[onclick*="Judge"]{display:inline-flex!important}
+  #simulator{padding:26px}
+}
+@media(max-width:650px){
+  .shell{padding:0 18px}.navInner{padding:10px 18px}
+  .hero{padding:46px 0 48px}.hero h1{font-size:54px}.hero p{font-size:16px}
+  .heroCard{padding:22px;border-radius:24px}
+  #simulator{padding:18px;border-radius:24px}.sectionHead h2{font-size:34px}
+}
+
+/* Final research, case study, and illustration additions */
+.scienceNotice{margin-top:22px;padding:13px 15px;max-width:650px;border:1px solid rgba(255,201,110,.22);border-radius:15px;background:rgba(255,201,110,.045);display:grid;gap:4px}
+.scienceNotice strong{font-size:12px;color:#ffe0a4}.scienceNotice span{font-size:11px;color:#c3b7a4;line-height:1.5}
+.scienceSection{padding-top:74px}.diagramPanel,.caseDiagramPanel,.caseNarrative,.fluorineExplainer,.referencesPanel{padding:24px}
+.diagramHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}.diagramHeader h3{margin:6px 0 0;font-size:23px;letter-spacing:-.02em}
+.diagramNote{font-size:11px;color:var(--muted)}.scienceDiagram{display:block;width:100%;height:auto;max-width:100%;margin:auto}
+.diagramFoot{font-size:12px;color:#bdc8df;line-height:1.65;padding:12px 5px 0;border-top:1px solid var(--line)}
+.diagramFoot a,.fluorineCopy a,.deepSource a{color:#9eead1;text-decoration:underline;text-underline-offset:3px}
+.scienceMiniGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.scienceMini{padding:20px}.scienceMini h3{font-size:19px;margin:10px 0}.scienceMini p{font-size:13px;color:#b8c2da;line-height:1.65;margin:0 0 15px}.tinySource{font-size:10px;color:#96a5c0}
+.caseGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.caseNarrative h3{font-size:28px;line-height:1.15;margin:17px 0 12px;letter-spacing:-.025em}.caseNarrative>p{font-size:13px;color:#b8c2da;line-height:1.7}.caseNarrative p strong{color:#f6f7ff}
+.caseFacts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.caseFacts>div{padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}.caseFacts b{display:block;font-size:19px;color:#bca8ff}.caseFacts span{display:block;font-size:10px;color:#aeb8d1;margin-top:5px;line-height:1.4}
+.caseQuestion{padding:12px 14px;border-left:3px solid #75e8ba;background:rgba(115,232,184,.05);border-radius:8px}.caseOutput{font-size:12px;line-height:1.6;color:#c3d4e5;background:rgba(155,124,255,.065);border:1px solid rgba(155,124,255,.16);padding:14px;border-radius:13px;margin-top:17px}.caseSvg{max-height:440px}
+.fluorineExplainer{margin-top:16px}.fluorineExplainerGrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center}.moleculeSvg{min-height:190px}.fluorineCopy h3{font-size:22px;margin:0 0 10px}.fluorineCopy p{font-size:12px;color:#c1cbe0;line-height:1.65}.fluorineCopy a{font-size:12px}
+.referencesPanel{margin-top:16px}.referenceGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.referenceCard{display:flex;flex-direction:column;gap:7px;padding:18px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025);color:#fff;text-decoration:none;transition:border-color .2s,transform .2s}.referenceCard:hover{border-color:rgba(115,232,184,.45);transform:translateY(-2px)}.referenceCard b{font-size:15px;line-height:1.4}.referenceCard small{color:#aebbd4;font-size:11px}.referenceCard p{font-size:12px;color:#b9c5dc;line-height:1.5;margin:0}.refNum{color:#ad9aff;font-size:10px;font-weight:900;letter-spacing:.08em}.refLink{color:#8ce5c1;font-size:12px;font-weight:800;margin-top:auto}
+.deepSource{margin-top:15px;border:1px solid rgba(115,232,184,.2);border-radius:13px;padding:14px;color:#c9d9e5;font-size:12px;line-height:1.7}.deepSource small{color:#9da8c2}
+#process,#caseStudy{scroll-margin-top:96px}
+@media(max-width:1000px){.caseGrid,.fluorineExplainerGrid{grid-template-columns:1fr}.scienceMiniGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.scienceMiniGrid,.referenceGrid{grid-template-columns:1fr}.caseFacts{grid-template-columns:1fr 1fr}.diagramPanel,.caseDiagramPanel,.caseNarrative,.fluorineExplainer,.referencesPanel{padding:16px}.caseNarrative h3{font-size:23px}.scienceSection{padding-top:48px}.diagramFoot{font-size:11px}.diagramHeader h3{font-size:20px}}
+@media(max-width:1000px){.simGrid,.radarCostGrid,.fateGrid,.caseGrid{grid-template-columns:minmax(0,1fr)!important}.controls,.results,.radarPanel,.economicsPanel,.caseNarrative,.caseDiagramPanel{min-width:0}.runRow{flex-wrap:wrap}.runRow .btn{min-width:0}}
+@media(max-width:650px){.results,.controls{padding:16px}.radarWrap svg{max-width:100%}.caseFacts{grid-template-columns:repeat(2,minmax(0,1fr))}.resultTop{flex-wrap:wrap}.resultTop>div:first-child{min-width:0;flex:1 1 170px}.resultName{overflow-wrap:anywhere}}
+
+</style>
+</head>
+<body>
+<nav>
+  <div class="navInner">
+    <div class="brand"><div class="mark">F</div><div class="brandName">FluoroLoop</div></div>
+    <div class="navLinks">
+      <button class="navBtn active" onclick="go('home',this)">Home</button>
+      <button class="navBtn" onclick="go('simulator',this)">Simulator</button>
+      <button class="navBtn" onclick="go('compare',this)">Compare</button>
+      <button class="navBtn" onclick="go('fate',this)">Fate</button><button class="navBtn" onclick="go('aiLab',this)">AI Copilot</button><button class="navBtn" onclick="go('hardware',this)">Hardware</button><button class="navBtn" onclick="go('validation',this)">Validation</button><button class="navBtn" onclick="go('evidence',this)">Evidence</button>
+      <button class="navBtn" onclick="openJudge()">Judge Mode</button>
+      <button class="navBtn" onclick="toggleA11y()">A11y</button><span class="badge">Research-informed demo</span>
+    </div>
+  </div>
+</nav>
+
+<div class="shell">
+<section id="home" class="hero">
+  <div>
+    <div class="eyebrow">PFAS destruction • fluorine fate • circular chemistry</div>
+    <h1><span class="grad">Follow the fluorine.<br>Not just the PFAS.</span></h1>
+    <p>A transparent decision engine for PFAS treatment: compare pathways, follow fluorine fate, and see exactly why one option outranks another.</p>
+    <div class="scienceNotice"><strong>Research-informed concept · interactive prototype</strong><span>All numeric treatment scores and fluorine percentages are illustrative, not measured performance or regulatory guidance.</span></div>
+    <div class="actions">
+      <button class="btn primary" onclick="go('simulator')">Run a PFAS Scenario →</button>
+      <button class="btn" onclick="openJudge()">Judge View · 30 sec</button>
+      <button class="btn" onclick="go('process')">Explore the science ↗</button>
+    </div>
+  </div>
+  <div class="heroCard heroFloat">
+    <div class="heroViz">
+      <div class="orbit"></div><div class="orbit o2"></div><div class="e e1"></div><div class="e e2"></div><div class="core">F</div>
+    </div>
+    <div class="heroStats">
+      <div class="heroStat"><b>6</b><span>treatments</span></div>
+      <div class="heroStat"><b>7</b><span>metrics</span></div>
+      <div class="heroStat"><b>4</b><span>fate outcomes</span></div>
+      <div class="heroStat"><b>∞</b><span>scenarios</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="credStrip" aria-label="FluoroLoop principles">
+  <div><b>Transparent ranking</b><span>Weighted logic stays inspectable.</span></div>
+  <div><b>Fluorine fate first</b><span>Recovery, fluoride, residuals, uncertainty.</span></div>
+  <div><b>Evidence-aware</b><span>Sourced, modeled, and unknown are separated.</span></div>
+</div>
+
+
+<section id="process" class="scienceSection">
+  <div class="sectionHead">
+    <div><div class="eyebrow">The science, illustrated</div><h2>Removal is not the same as destruction.</h2></div>
+    <p>Conventional treatment can separate PFAS from water. FluoroLoop explores what happens next: treating the residual stream and accounting for fluorine.</p>
+  </div>
+  <div class="panel diagramPanel">
+    <div class="diagramHeader"><span class="tag">Figure 01 · Conceptual treatment train</span><span class="diagramNote">Illustration, not a facility design</span></div>
+    <svg class="scienceDiagram" viewBox="0 0 1040 295" role="img" aria-labelledby="trainTitle trainDesc">
+      <title id="trainTitle">Four stages of a conceptual PFAS treatment train</title>
+      <desc id="trainDesc">PFAS-impacted water enters a capture or concentration step, which creates a PFAS-containing residual. A separate destruction process is evaluated, and independent testing checks fluoride, organofluorine and unknown fluorine.</desc>
+      <defs><linearGradient id="stageGrad" x1="0" x2="1"><stop stop-color="#1a2243"/><stop offset="1" stop-color="#111b2d"/></linearGradient><marker id="scienceArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#8edbc8"/></marker></defs>
+      <g font-family="Inter,Arial,sans-serif" fill="#f5f7ff">
+        <rect x="14" y="58" width="224" height="165" rx="22" fill="url(#stageGrad)" stroke="#8e82ff" stroke-opacity=".5"/>
+        <text x="33" y="88" fill="#b6a5ff" font-size="13" font-weight="800">01 · INPUT</text>
+        <path d="M91 126 C91 113 103 105 112 94 C120 108 135 119 135 133 C135 148 125 159 112 159 C99 159 91 146 91 133" fill="#69d5ff" fill-opacity=".2" stroke="#69d5ff" stroke-width="2.5"/>
+        <circle cx="112" cy="135" r="5" fill="#b9a4ff"/><circle cx="100" cy="130" r="4" fill="#b9a4ff"/><circle cx="125" cy="141" r="4" fill="#b9a4ff"/>
+        <text x="126" y="185" text-anchor="middle" font-size="15" font-weight="750">PFAS-impacted water</text>
+        <text x="126" y="203" text-anchor="middle" font-size="11" fill="#abb9d3">Characterize the feed</text>
+        <path d="M243 141 H274" stroke="#8edbc8" stroke-width="3" marker-end="url(#scienceArrow)"/>
+        <rect x="285" y="58" width="224" height="165" rx="22" fill="url(#stageGrad)" stroke="#70dbfb" stroke-opacity=".5"/>
+        <text x="305" y="88" fill="#70dbfb" font-size="13" font-weight="800">02 · SEPARATE</text>
+        <g stroke="#70dbfb" fill="none" stroke-width="2.5"><rect x="379" y="105" width="38" height="49" rx="7"/><path d="M387 111 V148 M395 111 V148 M403 111 V148 M411 111 V148"/></g>
+        <text x="397" y="185" text-anchor="middle" font-size="15" font-weight="750">Capture / concentrate</text>
+        <text x="397" y="203" text-anchor="middle" font-size="11" fill="#abb9d3">GAC · ion exchange · RO</text>
+        <path d="M514 141 H545" stroke="#8edbc8" stroke-width="3" marker-end="url(#scienceArrow)"/>
+        <rect x="556" y="58" width="224" height="165" rx="22" fill="url(#stageGrad)" stroke="#b59bff" stroke-opacity=".5"/>
+        <text x="576" y="88" fill="#b6a5ff" font-size="13" font-weight="800">03 · INVESTIGATE</text>
+        <g transform="translate(667,133)" stroke="#b6a5ff" stroke-width="2.5" fill="none"><circle r="27"/><path d="M-11 -12 L4 -1 L-2 13 L13 3 M-18 5 L-8 -3"/><circle cx="-11" cy="-12" r="4" fill="#75e8ba"/><circle cx="13" cy="3" r="4" fill="#75e8ba"/></g>
+        <text x="668" y="185" text-anchor="middle" font-size="15" font-weight="750">Screen destruction</text>
+        <text x="668" y="203" text-anchor="middle" font-size="11" fill="#abb9d3">Technology tradeoffs</text>
+        <path d="M785 141 H816" stroke="#8edbc8" stroke-width="3" marker-end="url(#scienceArrow)"/>
+        <rect x="827" y="58" width="199" height="165" rx="22" fill="url(#stageGrad)" stroke="#75e8ba" stroke-opacity=".5"/>
+        <text x="845" y="88" fill="#75e8ba" font-size="13" font-weight="800">04 · VERIFY</text>
+        <g transform="translate(925,130)" stroke-width="3" fill="none"><path d="M-24 0 L-8 15 L26 -22" stroke="#75e8ba"/><circle r="32" stroke="#75e8ba" stroke-opacity=".45"/></g>
+        <text x="926" y="185" text-anchor="middle" font-size="15" font-weight="750">Track fluorine fate</text>
+        <text x="926" y="203" text-anchor="middle" font-size="11" fill="#abb9d3">Measure · account · report</text>
+        <path d="M398 226 V247 H666 V226" stroke="#ffd18a" stroke-width="2" stroke-dasharray="5 5" fill="none"/>
+        <text x="532" y="267" text-anchor="middle" font-size="13" fill="#ffd18a">PFAS-containing residual needs management</text>
+      </g>
+    </svg>
+    <div class="diagramFoot">EPA identifies granular activated carbon, anion exchange, reverse osmosis, and nanofiltration as effective PFAS <strong>removal</strong> approaches. Separation does not, by itself, destroy the captured PFAS. <a href="https://www.epa.gov/system/files/documents/2024-04/pfas-npdwr_fact-sheet_treatment_4.8.24.pdf" target="_blank" rel="noopener noreferrer">EPA treatment fact sheet ↗</a></div>
+  </div>
+  <div class="scienceMiniGrid">
+    <div class="scienceMini panel"><div class="eyebrow">Capture</div><h3>Move PFAS out of water</h3><p>Adsorbents and membranes can produce cleaner water, but leave spent media or a concentrate requiring responsible handling.</p><span class="tinySource">Evidence: EPA drinking-water treatment guidance</span></div>
+    <div class="scienceMini panel"><div class="eyebrow">Destroy</div><h3>Challenge C–F bonds</h3><p>Emerging destruction approaches use electrochemical, thermal, plasma, or reductive conditions. Outcomes depend strongly on feed chemistry and operating conditions.</p><span class="tinySource">Evidence: ITRC PFAS treatment guidance</span></div>
+    <div class="scienceMini panel"><div class="eyebrow">Verify</div><h3>Follow the fluorine</h3><p>Loss of a parent PFAS is not proof of complete mineralization. Track inorganic fluoride, residual organofluorine, and any unaccounted fraction.</p><span class="tinySource">Evidence: Smith et al., Environmental Science &amp; Technology (2024)</span></div>
+  </div>
+</section>
+
+<section id="simulator">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Decision engine</div><h2>Build a real treatment scenario</h2></div>
+    <p>Set the PFAS profile, waste stream, and priorities. FluoroLoop updates the ranking, tradeoffs, and Fluorine Passport in one view.</p>
+  </div>
+
+  
+<div class="demoRail" id="demoRail">
+  <div class="demoStep active" id="demo1"><b>01 · Set the problem</b><span>Choose PFAS, waste stream, and priorities.</span></div>
+  <div class="demoStep" id="demo2"><b>02 · Rank pathways</b><span>See which treatment wins and why.</span></div>
+  <div class="demoStep" id="demo3"><b>03 · Follow fluorine</b><span>Trace recovery, fluoride, residuals, and uncertainty.</span></div>
+  <div class="demoStep" id="demo4"><b>04 · Verify evidence</b><span>Open the evidence ledger and model assumptions.</span></div>
+</div>
+<div class="demoControls">
+  <button class="btn small" onclick="guidedDemo()">▶ Run guided demo</button>
+  <button class="btn small" onclick="randomScenario()">↻ Random scenario</button>
+</div>
+
+<div class="presetRow">
+    <button class="preset" onclick="preset('destruction')">⚡ Destruction-first</button>
+    <button class="preset" onclick="preset('recovery')">♻️ Recovery-first</button>
+    <button class="preset" onclick="preset('energy')">🌱 Low-energy</button>
+    <button class="preset" onclick="preset('deployment')">🏭 Deployment-first</button>
+  </div>
+
+  <div class="simGrid">
+    <div class="panel controls">
+      <h3>Scenario inputs</h3>
+      <div class="twoCol">
+        <div><label>PFAS profile</label><select id="pfas"><option>PFOA</option><option>PFOS</option><option>GenX</option><option>Mixed PFAS</option></select></div>
+        <div><label>Waste stream</label><select id="stream"><option>Contaminated water</option><option>PFAS concentrate</option><option>Landfill leachate</option><option>AFFF-derived waste</option></select></div>
+      </div>
+      <div class="twoCol">
+        <div><label>Concentration (µg/L)</label><input id="conc" type="number" value="100" min="1"></div>
+        <div><label>Volume (L)</label><input id="vol" type="number" value="1000" min="1"></div>
+      </div>
+
+      <label style="margin-top:20px">Decision priorities</label>
+      <div class="priorityGrid">
+        <div class="priorityBox"><label>Destruction <span id="wDestVal">85</span>%</label><input id="wDest" type="range" min="0" max="100" value="85" oninput="labels()"></div>
+        <div class="priorityBox"><label>Low energy <span id="wEnergyVal">45</span>%</label><input id="wEnergy" type="range" min="0" max="100" value="45" oninput="labels()"></div>
+        <div class="priorityBox"><label>Recovery <span id="wRecoveryVal">75</span>%</label><input id="wRecovery" type="range" min="0" max="100" value="75" oninput="labels()"></div>
+        <div class="priorityBox"><label>Readiness <span id="wReadinessVal">55</span>%</label><input id="wReadiness" type="range" min="0" max="100" value="55" oninput="labels()"></div>
+      </div>
+
+      <div class="runRow">
+        <button class="btn primary" onclick="run()">Run scenario</button>
+        <button class="btn" onclick="saveScenario()">Save scenario</button>
+      </div>
+    </div>
+
+    <div class="panel results">
+      <div class="resultTop">
+        <div>
+          <div class="eyebrow">Top-ranked pathway · illustrative scores</div>
+          <div class="resultName" id="winner">Electrochemical Oxidation</div>
+          <p class="resultDesc" id="winnerText">Balanced performance across your selected priorities.</p>
+        </div>
+        <div class="scoreRing" id="ring"><b id="score">82</b></div>
+      </div>
+
+      <div class="scorePair">
+        <div class="scoreBox"><div class="lbl">Decision score</div><div class="big" id="decisionScore">82</div></div>
+        <div class="scoreBox"><div class="lbl">Circularity score</div><div class="big" id="circularScore">74</div></div>
+      </div>
+
+      <div class="metricGrid">
+        <div class="metric"><div class="metricTop"><span>Destruction</span><b id="mdV">88</b></div><div class="bar"><div id="md" class="fill" style="width:88%"></div></div></div>
+        <div class="metric"><div class="metricTop"><span>Low energy</span><b id="meV">72</b></div><div class="bar"><div id="me" class="fill" style="width:72%"></div></div></div>
+        <div class="metric"><div class="metricTop"><span>Recovery</span><b id="mrV">84</b></div><div class="bar"><div id="mr" class="fill" style="width:84%"></div></div></div>
+        <div class="metric"><div class="metricTop"><span>Readiness</span><b id="mtV">76</b></div><div class="bar"><div id="mt" class="fill" style="width:76%"></div></div></div>
+        <div class="metric"><div class="metricTop"><span>Residual control</span><b id="msV">78</b></div><div class="bar"><div id="ms" class="fill" style="width:78%"></div></div></div>
+        <div class="metric"><div class="metricTop"><span>Confidence</span><b id="mcV">78</b></div><div class="bar"><div id="mc" class="fill" style="width:78%"></div></div></div>
+      </div>
+
+      
+<div class="insightGrid">
+  <div class="insight"><div class="label">Best strength</div><div class="value" id="bestStrength">Recovery</div><div class="sub" id="bestStrengthSub">Highest-scoring dimension for the active pathway.</div></div>
+  <div class="insight"><div class="label">Biggest tradeoff</div><div class="value" id="biggestTradeoff">Energy</div><div class="sub" id="biggestTradeoffSub">Lowest-scoring dimension to watch.</div></div>
+  <div class="insight"><div class="label">Why it won</div><div class="value" id="winnerReason">Balanced fit</div><div class="sub" id="winnerReasonSub">Best match to the priorities selected.</div></div>
+</div>
+
+
+<div class="radarCostGrid">
+  <div class="radarPanel">
+    <div class="eyebrow">Tradeoff radar</div>
+    <h3 style="margin:5px 0 0">Engineering profile</h3>
+    <div class="radarWrap">
+      <svg viewBox="0 0 360 330" aria-label="Treatment radar chart">
+        <g transform="translate(180,155)">
+          <polygon class="radarRing" points="0,-120 103.9,-60 103.9,60 0,120 -103.9,60 -103.9,-60"/>
+          <polygon class="radarRing" points="0,-90 77.9,-45 77.9,45 0,90 -77.9,45 -77.9,-45"/>
+          <polygon class="radarRing" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30"/>
+          <line class="radarAxis" x1="0" y1="0" x2="0" y2="-120"/>
+          <line class="radarAxis" x1="0" y1="0" x2="103.9" y2="-60"/>
+          <line class="radarAxis" x1="0" y1="0" x2="103.9" y2="60"/>
+          <line class="radarAxis" x1="0" y1="0" x2="0" y2="120"/>
+          <line class="radarAxis" x1="0" y1="0" x2="-103.9" y2="60"/>
+          <line class="radarAxis" x1="0" y1="0" x2="-103.9" y2="-60"/>
+          <polygon id="radarShape" class="radarShape" points="0,-106 74,-43 87,50 0,91 -81,47 -70,-40"/>
+          <circle id="rp1" class="radarPoint" r="4"/><circle id="rp2" class="radarPoint" r="4"/><circle id="rp3" class="radarPoint" r="4"/>
+          <circle id="rp4" class="radarPoint" r="4"/><circle id="rp5" class="radarPoint" r="4"/><circle id="rp6" class="radarPoint" r="4"/>
+          <text class="radarLabel" x="0" y="-137" text-anchor="middle">Destruction</text>
+          <text class="radarLabel" x="125" y="-68" text-anchor="start">Energy</text>
+          <text class="radarLabel" x="128" y="72" text-anchor="start">Recovery</text>
+          <text class="radarLabel" x="0" y="143" text-anchor="middle">Readiness</text>
+          <text class="radarLabel" x="-128" y="72" text-anchor="end">Residual control</text>
+          <text class="radarLabel" x="-125" y="-68" text-anchor="end">Confidence</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="economicsPanel">
+    <div class="eyebrow">Deployment snapshot</div>
+    <h3 style="margin:5px 0 0">Cost, energy & scale</h3>
+    <div class="econGrid">
+      <div class="econCard"><div class="lbl">Relative cost</div><div class="val" id="costLevel">Medium</div><div class="scale" id="costScale"></div><div class="sub">Illustrative relative cost only.</div></div>
+      <div class="econCard"><div class="lbl">Energy intensity</div><div class="val" id="energyLevel">Medium</div><div class="scale" id="energyScale"></div><div class="sub">Derived from the demo low-energy score.</div></div>
+      <div class="econCard"><div class="lbl">Scalability</div><div class="val" id="scaleLevel">Medium</div><div class="scale" id="scaleScale"></div><div class="sub">Prototype deployment estimate.</div></div>
+      <div class="econCard"><div class="lbl">Technology maturity</div><div class="val" id="maturityLevel">Pilot</div><div class="scale" id="maturityScale"></div><div class="sub">Mapped from readiness score.</div></div>
+    </div>
+
+    <div class="challengePanel">
+      <div class="challengeHead">
+        <div>
+          <div class="eyebrow">Stress test</div>
+          <h4 style="margin:5px 0 0">Challenge the recommendation</h4>
+        </div>
+        <button class="btn small" onclick="challengeRecommendation()">Challenge result</button>
+      </div>
+      <div id="challengeResult" class="challengeResult">Press the button to find the smallest priority shift that makes another treatment win.</div>
+      <div class="sensitivityGrid" id="sensitivityGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="why" class="whyBox">Why this method? It performs well across the priorities you selected.</div>
+<div class="confidenceStrip">
+  <div style="display:flex;justify-content:space-between;gap:10px;font-size:11px"><span>Illustrative confidence range</span><b id="rangeLabel">72–84</b></div>
+  <div class="rangeBar"><div id="rangeBand" class="rangeBand" style="left:72%;width:12%"></div><div id="rangeDot" class="rangeDot" style="left:78%"></div></div>
+</div>
+<div class="explainPanel">
+  <h4>What changed this recommendation?</h4>
+  <p id="changeExplain">Recovery and destruction priorities are carrying the most weight in this scenario.</p>
+</div>
+      <div class="uncertainty"><b>Uncertainty:</b> <span id="uncertaintyText">Moderate uncertainty in this prototype model.</span></div>
+    </div>
+  </div>
+</section>
+
+
+<section id="caseStudy" class="scienceSection">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Real-world application · hypothetical example</div><h2>What would this look like at a treatment site?</h2></div>
+    <p>Follow a plausible residual-management problem from contaminated water to a destruction-screening decision. The numbers are sample inputs, not site measurements.</p>
+  </div>
+  <div class="caseGrid">
+    <div class="panel caseNarrative">
+      <span class="tag">Case 01 · Concentrate management</span>
+      <h3>A utility needs a plan for PFAS-rich residuals.</h3>
+      <p>A drinking-water utility can use separation technologies to reduce PFAS in finished water. But the captured PFAS does not disappear. Suppose the team has a <strong>hypothetical 1,000 L concentrate</strong> containing <strong>250 µg/L PFOA</strong> and wants to compare candidate downstream destruction technologies.</p>
+      <div class="caseFacts"><div><b>1,000 L</b><span>Illustrative residual volume</span></div><div><b>250 µg/L</b><span>Illustrative PFOA input</span></div><div><b>6 methods</b><span>Conceptual screening</span></div></div>
+      <p class="caseQuestion"><strong>Engineering question:</strong> Which pathway looks promising under selected priorities, and what fluorine measurements would still be needed to verify the outcome?</p>
+      <div class="actions"><button class="btn primary" onclick="loadCaseStudy()">Load example into simulator →</button><button class="btn" onclick="go('evidence')">Review sources</button></div>
+      <div class="caseOutput" id="caseOutput" aria-live="polite">Select “Load example” to compare six hypothetical pathways. This tool does not calculate regulatory compliance or measured destruction efficiency.</div>
+    </div>
+    <div class="panel caseDiagramPanel">
+      <div class="diagramHeader"><span class="tag">Figure 02 · Case-study pathway</span><span class="diagramNote">Not to scale</span></div>
+      <svg class="scienceDiagram caseSvg" viewBox="0 0 580 430" role="img" aria-labelledby="caseTitle caseDesc">
+        <title id="caseTitle">PFAS concentrate management example</title><desc id="caseDesc">PFAS-impacted water passes through a separation process. Treated water goes to verification. The PFAS-rich residual goes to a candidate destruction treatment, then laboratory analysis checks fluoride, organofluorine, and other byproducts.</desc>
+        <defs><marker id="caseArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#8edbc8"/></marker></defs>
+        <g font-family="Inter,Arial,sans-serif" text-anchor="middle">
+          <rect x="188" y="12" width="204" height="70" rx="18" fill="#19213a" stroke="#9b7cff"/><text x="290" y="40" fill="#f8f9ff" font-size="17" font-weight="750">Impacted water</text><text x="290" y="60" fill="#aebcdb" font-size="12">Characterize PFAS</text>
+          <path d="M290 84 V113" stroke="#8edbc8" stroke-width="3" marker-end="url(#caseArrow)"/>
+          <rect x="188" y="121" width="204" height="72" rx="18" fill="#172a36" stroke="#70dbfb"/><text x="290" y="150" fill="#f8f9ff" font-size="17" font-weight="750">Separation</text><text x="290" y="170" fill="#aebcdb" font-size="12">GAC / IX / RO / NF</text>
+          <path d="M188 157 H94 V209" stroke="#8edbc8" stroke-width="3" fill="none" marker-end="url(#caseArrow)"/>
+          <rect x="8" y="218" width="177" height="73" rx="17" fill="#122e2a" stroke="#75e8ba"/><text x="97" y="246" fill="#f8f9ff" font-size="15" font-weight="750">Treated water</text><text x="97" y="267" fill="#b5dbd0" font-size="11">Verify finished quality</text>
+          <path d="M392 157 H486 V209" stroke="#8edbc8" stroke-width="3" fill="none" marker-end="url(#caseArrow)"/>
+          <rect x="399" y="218" width="173" height="73" rx="17" fill="#32241c" stroke="#ffd18a"/><text x="485" y="244" fill="#f8f9ff" font-size="15" font-weight="750">PFAS residual</text><text x="485" y="266" fill="#f2d9b1" font-size="11">Needs management</text>
+          <path d="M485 293 V321 H290 V334" stroke="#8edbc8" stroke-width="3" fill="none" marker-end="url(#caseArrow)"/>
+          <rect x="166" y="342" width="248" height="75" rx="18" fill="#251d3a" stroke="#b49cff"/><text x="290" y="369" fill="#f8f9ff" font-size="16" font-weight="750">Candidate destruction</text><text x="290" y="390" fill="#c4b7e7" font-size="12">Then test fluorine + byproducts</text>
+        </g>
+      </svg>
+      <div class="diagramFoot"><strong>Key distinction:</strong> the example begins with a hypothetical concentrate. The simulator ranks <em>destruction candidates</em>, not full drinking-water treatment trains. Lab analysis and pilot testing would be required.</div>
+    </div>
+  </div>
+</section>
+
+<section id="compare">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Three-way comparison</div><h2>Compare the top candidates</h2></div>
+    <p>The top three pathways are shown side-by-side so tradeoffs are visible instead of hidden behind one ranking.</p>
+  </div>
+  <div class="panel comparePanel">
+    <div id="tripleCompare" class="triple"></div>
+  </div>
+
+<div class="panel" style="padding:18px;margin-top:14px">
+  <div class="eyebrow">Live ranking spread</div>
+  <h3 style="margin:6px 0 12px">How close is the decision?</h3>
+  <div id="rankingBars"></div>
+</div>
+
+</section>
+
+<section id="methods">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Treatment tournament</div><h2>Six pathways, ranked live</h2></div>
+    <p>Click any method to inspect its Fluorine Passport even if it is not ranked first.</p>
+  </div>
+  <div id="methodGrid" class="methodGrid"></div>
+</section>
+
+<section id="fate">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Signature feature</div><h2>Fluorine Fate Tracker</h2></div>
+    <p>The model separates recovery, inorganic fluoride, residual organofluorine, and uncertainty into one visible mass-balance story.</p>
+  </div>
+
+  <div class="fateGrid">
+    <div class="panel passport">
+      <div class="passportHeader">
+        <div>
+          <div class="eyebrow">Fluorine Passport · hypothetical fractions</div>
+          <h3 id="passportMethod">Electrochemical Oxidation</h3>
+          <small id="passportScenario">PFOA • contaminated water • 100 µg/L</small>
+        </div>
+        <span class="badge">Demo model</span>
+      </div>
+      <div class="passportRows">
+        <div class="passportRow"><span>Input fluorine basis</span><b>100%</b></div>
+        <div class="passportRow"><span>Recoverable fluoride</span><b id="pr">42%</b></div>
+        <div class="passportRow"><span>Inorganic fluoride</span><b id="pi">36%</b></div>
+        <div class="passportRow"><span>Residual organofluorine</span><b id="po">14%</b></div>
+        <div class="passportRow"><span>Uncertain / unaccounted</span><b id="pu">8%</b></div>
+      </div>
+      <div class="circularity"><div class="eyebrow">Illustrative circularity index</div><b id="passportCircular">74</b><div style="color:var(--muted);font-size:11px;margin-top:5px">Rewards destruction + fluorine recovery while penalizing residual organofluorine and energy burden.</div></div>
+    </div>
+
+    <div class="panel flowPanel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div><div class="eyebrow">Animated fluorine map</div><h3 style="margin:5px 0 0">Where did the fluorine go?</h3></div>
+        <button class="btn small" onclick="animateFlow()">Replay flow</button>
+      </div>
+      <div class="flowSvgWrap">
+        <svg viewBox="0 0 760 350" aria-label="Fluorine fate diagram">
+          <defs>
+            <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <rect x="40" y="125" rx="24" ry="24" width="150" height="100" fill="#171d35" stroke="#9b7cff55"/>
+          <text x="115" y="165" text-anchor="middle" class="nodeText">PFAS INPUT</text>
+          <text x="115" y="188" text-anchor="middle" class="smallText">100% fluorine basis</text>
+
+          <rect x="305" y="125" rx="24" ry="24" width="150" height="100" fill="#171d35" stroke="#73e8b855"/>
+          <text x="380" y="165" text-anchor="middle" class="nodeText" id="svgMethod">TREATMENT</text>
+          <text x="380" y="188" text-anchor="middle" class="smallText">selected pathway</text>
+
+          <path id="linkIn" class="link" stroke="#bfaaff" stroke-width="16" d="M190 175 C240 175,255 175,305 175"/>
+
+          <path id="linkR" class="link recover" stroke-width="18" d="M455 150 C515 105,545 90,610 75"/>
+          <path id="linkI" class="link inorg" stroke-width="15" d="M455 165 C525 155,555 150,610 145"/>
+          <path id="linkO" class="link resid" stroke-width="10" d="M455 185 C525 205,555 215,610 225"/>
+          <path id="linkU" class="link unc" stroke-width="7" d="M455 200 C520 250,550 275,610 300"/>
+
+          <circle cx="650" cy="75" r="36" fill="#73e8b81a" stroke="#73e8b8"/>
+          <text x="650" y="71" text-anchor="middle" class="nodeText">Recover</text><text id="svgRVal" x="650" y="91" text-anchor="middle" class="smallText">42%</text>
+          <circle cx="650" cy="145" r="36" fill="#6edcff1a" stroke="#6edcff"/>
+          <text x="650" y="141" text-anchor="middle" class="nodeText">Fluoride</text><text id="svgIVal" x="650" y="161" text-anchor="middle" class="smallText">36%</text>
+          <circle cx="650" cy="225" r="36" fill="#ffc96e1a" stroke="#ffc96e"/>
+          <text x="650" y="221" text-anchor="middle" class="nodeText">Residual</text><text id="svgOVal" x="650" y="241" text-anchor="middle" class="smallText">14%</text>
+          <circle cx="650" cy="300" r="36" fill="#ff8aa81a" stroke="#ff8aa8"/>
+          <text x="650" y="296" text-anchor="middle" class="nodeText">Unknown</text><text id="svgUVal" x="650" y="316" text-anchor="middle" class="smallText">8%</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel fluorineExplainer">
+    <div class="diagramHeader"><span class="tag">Figure 03 · Fluorine accounting</span><span class="diagramNote">Conceptual, not measured</span></div>
+    <div class="fluorineExplainerGrid">
+      <svg class="scienceDiagram moleculeSvg" viewBox="0 0 510 210" role="img" aria-labelledby="moleculeTitle moleculeDesc">
+        <title id="moleculeTitle">Carbon-fluorine bond and treatment transformation</title>
+        <desc id="moleculeDesc">A schematic of carbon and fluorine atoms linked by bonds, followed by an arrow to three possible fate categories: fluoride, residual organofluorine, and unaccounted fluorine.</desc>
+        <defs><marker id="molArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#8edbc8"/></marker></defs>
+        <g stroke-width="3" stroke="#c2b6f4"><path d="M84 104 L133 74 L183 104 L133 134 Z" fill="none"/><path d="M84 104 L51 70 M84 104 L51 143 M183 104 L217 70 M183 104 L217 143"/></g>
+        <g font-family="Inter,Arial,sans-serif" font-weight="800" font-size="17" text-anchor="middle"><circle cx="84" cy="104" r="19" fill="#9b7cff"/><text x="84" y="110" fill="#080b18">C</text><circle cx="183" cy="104" r="19" fill="#9b7cff"/><text x="183" y="110" fill="#080b18">C</text><circle cx="133" cy="74" r="19" fill="#9b7cff"/><text x="133" y="80" fill="#080b18">F</text><circle cx="133" cy="134" r="19" fill="#9b7cff"/><text x="133" y="140" fill="#080b18">F</text><circle cx="51" cy="70" r="18" fill="#9b7cff"/><text x="51" y="76" fill="#080b18">F</text><circle cx="51" cy="143" r="18" fill="#9b7cff"/><text x="51" y="149" fill="#080b18">F</text><circle cx="217" cy="70" r="18" fill="#9b7cff"/><text x="217" y="76" fill="#080b18">F</text><circle cx="217" cy="143" r="18" fill="#9b7cff"/><text x="217" y="149" fill="#080b18">F</text></g>
+        <path d="M256 104 H306" stroke="#8edbc8" stroke-width="3" marker-end="url(#molArrow)"/>
+        <g font-family="Inter,Arial,sans-serif" font-size="14"><text x="319" y="53" fill="#75e8ba">F⁻ · fluoride</text><text x="319" y="97" fill="#ffd18a">C–F · organofluorine</text><text x="319" y="141" fill="#ff8aa8">? · unaccounted</text><text x="319" y="178" font-size="12" fill="#aebcdb">Needs independent analysis</text></g>
+      </svg>
+      <div class="fluorineCopy"><h3>What should scientists actually measure?</h3><p>Check parent PFAS and transformation products, measure released inorganic fluoride, and assess total/extractable organofluorine where appropriate. A credible fluorine mass balance must also report analytical recovery and uncertainty.</p><p><strong>Important:</strong> the percentages in the Fluorine Passport are a demonstration of how results could be displayed. They are <em>not</em> predictions of real fluoride recovery.</p><a href="https://doi.org/10.1021/acs.est.3c10617" target="_blank" rel="noopener noreferrer">Why fluorine mass balance matters ↗</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="aiLab">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Explanation copilot · rule-based preview</div><h2>Ask FluoroLoop to explain the engineering.</h2></div>
+    <p>This offline demo uses transparent, rule-based responses. It does not connect to an AI model or external API, and it never chooses the treatment ranking.</p>
+  </div>
+  <div class="aiGrid">
+    <div class="panel aiComposer">
+      <div class="eyebrow">Natural-language interface</div>
+      <h3 style="margin:6px 0 8px">Ask FluoroLoop</h3>
+      <div class="chips">
+        <button class="chip" onclick="setPrompt('Why did this treatment win?')">Why did this win?</button>
+        <button class="chip" onclick="setPrompt('Explain the biggest tradeoff in simple terms.')">Explain tradeoff</button>
+        <button class="chip" onclick="setPrompt('What would make another treatment win?')">Challenge result</button>
+        <button class="chip" onclick="setPrompt('Explain this result to someone who does not know chemistry.')">Explain simply</button>
+      </div>
+      <textarea id="aiPrompt" class="promptBox">Why did this treatment win?</textarea>
+      <div class="runRow">
+        <button class="btn primary" onclick="askCopilot()">Ask Copilot</button>
+        <button class="btn" onclick="applyNaturalLanguage()">Use as scenario instruction</button>
+      </div>
+      <div class="whyBox"><b>Copilot transparency:</b> this is a local rule-based explanation preview, not a live AI integration. The ranking is calculated separately using illustrative weighted scores.</div>
+    </div>
+    <div class="panel aiResponse">
+      <div class="eyebrow">Grounded response</div>
+      <h3 style="margin:6px 0 8px">Copilot answer</h3>
+      <div id="aiAnswer" class="aiAnswer">Ask a question about the active treatment result.</div>
+      <div class="eyebrow" style="margin-top:14px">Local context used for explanation</div>
+      <div id="contextPacket" class="contextPacket">Run a scenario to populate the evidence packet.</div>
+    </div>
+  </div>
+</section>
+
+<section id="hardware">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Hardware digital twin</div><h2>FluoroLoop Field Node</h2></div>
+    <p>A simulated treatment-monitoring node that tracks fluoride and process conditions and streams them into FluoroLoop. It does not claim to directly measure PFAS with a simple sensor.</p>
+  </div>
+  <div class="hardwareGrid">
+    <div class="panel hardwarePanel">
+      <div class="eyebrow">Virtual sensor bench</div>
+      <h3 style="margin:6px 0 4px">Live process inputs</h3>
+      <div class="sensorGrid">
+        <div class="sensor"><label>Fluoride (mg/L)</label><div class="sensorValue"><span id="fluorideV">12.0</span></div><input id="fluoride" type="range" min="0" max="50" step="0.5" value="12" oninput="updateHardware()"></div>
+        <div class="sensor"><label>Temperature (°C)</label><div class="sensorValue"><span id="tempV">28</span></div><input id="temp" type="range" min="5" max="120" value="28" oninput="updateHardware()"></div>
+        <div class="sensor"><label>pH</label><div class="sensorValue"><span id="phV">7.0</span></div><input id="ph" type="range" min="2" max="12" step="0.1" value="7" oninput="updateHardware()"></div>
+        <div class="sensor"><label>Flow (L/min)</label><div class="sensorValue"><span id="flowV">4.0</span></div><input id="flow" type="range" min="0" max="20" step="0.5" value="4" oninput="updateHardware()"></div>
+      </div>
+      <div class="hwStatus">
+        <div class="hwStat"><b>ONLINE</b><span>ESP32 node</span></div>
+        <div class="hwStat"><b>1 Hz</b><span>sample rate</span></div>
+        <div class="hwStat"><b id="qualityState">GOOD</b><span>signal quality</span></div>
+      </div>
+      <div id="hwAlert" class="hwAlert">All simulated process values are within the demo monitoring range.</div>
+    </div>
+    <div class="panel hardwarePanel">
+      <div class="eyebrow">System architecture</div>
+      <h3 style="margin:6px 0 10px">Sensor → controller → FluoroLoop</h3>
+      <div class="arch">
+        <svg viewBox="0 0 720 240">
+          <defs><marker id="arrV7" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#9b7cff"/></marker></defs>
+          <rect x="20" y="55" width="170" height="130" rx="18" fill="#151b31" stroke="#6edcff77"/>
+          <text x="105" y="85" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">PROCESS SENSORS</text>
+          <text x="105" y="112" text-anchor="middle" fill="#a8b1cc" font-size="11">Fluoride ISE</text>
+          <text x="105" y="132" text-anchor="middle" fill="#a8b1cc" font-size="11">pH • temperature</text>
+          <text x="105" y="152" text-anchor="middle" fill="#a8b1cc" font-size="11">flow • conductivity</text>
+          <rect x="275" y="70" width="170" height="100" rx="18" fill="#151b31" stroke="#73e8b877"/>
+          <text x="360" y="105" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">ESP32 NODE</text>
+          <text x="360" y="132" text-anchor="middle" fill="#a8b1cc" font-size="11">calibration • filtering</text>
+          <text x="360" y="150" text-anchor="middle" fill="#a8b1cc" font-size="11">telemetry</text>
+          <rect x="530" y="55" width="170" height="130" rx="18" fill="#151b31" stroke="#9b7cff77"/>
+          <text x="615" y="90" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">FLUOROLOOP</text>
+          <text x="615" y="118" text-anchor="middle" fill="#a8b1cc" font-size="11">decision engine</text>
+          <text x="615" y="138" text-anchor="middle" fill="#a8b1cc" font-size="11">fate tracker</text>
+          <text x="615" y="158" text-anchor="middle" fill="#a8b1cc" font-size="11">AI explanation</text>
+          <line x1="190" y1="120" x2="274" y2="120" stroke="#9b7cff" stroke-width="3" marker-end="url(#arrV7)"/>
+          <line x1="445" y1="120" x2="529" y2="120" stroke="#9b7cff" stroke-width="3" marker-end="url(#arrV7)"/>
+        </svg>
+      </div>
+      <div class="bom">
+        <div class="bomItem"><b>Controller</b><br>ESP32 development board</div>
+        <div class="bomItem"><b>Fluoride</b><br>Ion-selective electrode + interface</div>
+        <div class="bomItem"><b>Process sensors</b><br>pH, temperature, conductivity, flow</div>
+        <div class="bomItem"><b>Physical design</b><br>Enclosure + PCB/interface board concept</div>
+      </div>
+      <div class="whyBox"><b>Hardware-track fit:</b> final submission can include circuit/block diagrams, an enclosure/PCB concept, bill of materials, simulated sensor stream, calibration logic, and documentation.</div>
+    </div>
+  </div>
+</section>
+
+<section id="validation">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Reliability & validation</div><h2>A polished demo that also knows its limits.</h2></div>
+    <p>Input checks, arithmetic checks, explicit assumptions, and transparent limits help prevent a prototype from being mistaken for a validated engineering tool.</p>
+  </div>
+
+  <div class="validationGrid">
+    <div class="panel" style="padding:20px">
+      <div class="eyebrow">Live self-check</div>
+      <h3 style="margin:6px 0 0">System health</h3>
+      <div class="testList" id="testList">
+        <div class="testRow"><span>Input validation</span><b class="statusGood">PASS</b></div>
+        <div class="testRow"><span>Illustrative fate fractions sum to 100%</span><b class="statusGood">PASS</b></div>
+        <div class="testRow"><span>Ranking engine returns 6 methods</span><b class="statusGood">PASS</b></div>
+        <div class="testRow"><span>Uncertainty shown to user</span><b class="statusGood">PASS</b></div>
+        <div class="testRow"><span>Reduced-motion preference</span><b class="statusGood">SUPPORTED</b></div>
+        <div class="testRow"><span>Real AI API connected</span><b class="statusWarn">RULE-BASED PREVIEW</b></div>
+        <div class="testRow"><span>Physical hardware fabricated</span><b class="statusWarn">DIGITAL TWIN</b></div>
+      </div>
+      <div class="runRow">
+        <button class="btn primary" onclick="runSelfCheck()">Run self-check</button>
+        <button class="btn" onclick="exportReport()">Export engineering report</button>
+      </div>
+      <div id="reportPreview" class="reportPreview">The report will summarize the scenario, recommendation, scores, fluorine fate, uncertainty, and model limitations.</div>
+    </div>
+
+    <div class="panel" style="padding:20px">
+      <div class="eyebrow">Model boundaries</div>
+      <h3 style="margin:6px 0 0">What FluoroLoop will and will not claim</h3>
+      <div class="docsGrid">
+        <div class="docCard"><b>✓ Decision support</b><span>Compare technologies and make tradeoffs visible.</span></div>
+        <div class="docCard"><b>✓ Transparent modeling</b><span>Separate source-backed data, derived values, and assumptions.</span></div>
+        <div class="docCard"><b>✓ Uncertainty</b><span>Keep unknown fluorine and confidence ranges visible.</span></div>
+        <div class="docCard"><b>✕ No regulatory advice</b><span>Not a substitute for professional engineering or permitting decisions.</span></div>
+        <div class="docCard"><b>✕ No fake PFAS sensor</b><span>The Field Node monitors process variables, not magical direct PFAS detection.</span></div>
+        <div class="docCard"><b>✕ AI is not the calculator</b><span>The deterministic engine chooses; AI explains grounded results.</span></div>
+      </div>
+      <div class="modelBoundary"><b>Safety / credibility rule:</b> prototype performance numbers are deliberately illustrative. Real engineering decisions require measured treatment data, independent fluorine accounting, appropriate analytical methods, and site-specific evaluation.</div>
+    </div>
+  </div>
+</section>
+
+<section id="story">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Result story</div><h2>Turn the model into a decision narrative.</h2></div>
+    <p>A judge should be able to understand the recommendation without reading every chart.</p>
+  </div>
+  <div class="panel storyPanel">
+    <div class="storyGrid">
+      <div class="storyCard">
+        <div class="eyebrow">What FluoroLoop chose</div>
+        <h4 id="storyWinner">Electrochemical Oxidation</h4>
+        <p id="storyWinnerText">This pathway currently provides the strongest balance across the selected priorities.</p>
+      </div>
+      <div class="storyCard">
+        <div class="eyebrow">What the user gives up</div>
+        <h4 id="storyTradeoff">Energy demand</h4>
+        <p id="storyTradeoffText">The recommendation is not perfect; the tool keeps the biggest tradeoff visible.</p>
+      </div>
+      <div class="storyCard">
+        <div class="eyebrow">What happens to fluorine</div>
+        <h4 id="storyFate">42% recoverable</h4>
+        <p id="storyFateText">The fate view prevents “PFAS removed” from being the end of the analysis.</p>
+      </div>
+      <div class="storyCard">
+        <div class="eyebrow">What remains uncertain</div>
+        <h4 id="storyUncertainty">8% uncertain</h4>
+        <p id="storyUncertaintyText">Uncertainty stays visible instead of being hidden behind a single score.</p>
+      </div>
+    </div>
+    <div class="finalCallout">
+      <h4>FluoroLoop’s core question</h4>
+      <p><b>Did we only destroy the PFAS molecule, or did we actually understand where the fluorine went?</b></p>
+    </div>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Evidence mode</div><h2>Every score should be explainable.</h2></div>
+    <p>This prototype separates source-backed inputs, modeled assumptions, and uncertainty so the recommendation never feels like a black box.</p>
+  </div>
+
+  <div class="evidenceGrid">
+    <div class="evidenceCard">
+      <div class="eyebrow">Source-backed</div>
+      <h4>Published treatment evidence</h4>
+      <p>EPA, ITRC, and peer-reviewed research support the scientific context. The links below document separation, emerging destruction pathways, and fluorine mass balance. They do <strong>not</strong> validate this prototype’s numerical scores.</p>
+      <div class="evidenceMeta"><span class="metaPill">Literature</span><span class="metaPill">Traceable</span></div>
+    </div>
+    <div class="evidenceCard">
+      <div class="eyebrow">Modeled</div>
+      <h4>Scenario calculations</h4>
+      <p>The current six-pathway ranking uses hand-selected, illustrative 0–100 values and user-set weights. It is a transparent interactive demonstration, not a calibrated predictive model.</p>
+      <div class="evidenceMeta"><span class="metaPill">Model</span><span class="metaPill">Explainable</span></div>
+    </div>
+    <div class="evidenceCard">
+      <div class="eyebrow">Uncertain</div>
+      <h4>Known data gaps</h4>
+      <p>The tool can preserve uncertainty rather than forcing every fluorine atom into a falsely precise category.</p>
+      <div class="evidenceMeta"><span class="metaPill">Uncertainty</span><span class="metaPill">Visible</span></div>
+    </div>
+  </div>
+
+  <div class="panel" style="padding:20px;margin-top:16px">
+    <div class="eyebrow">Evidence ledger</div>
+    <h3 style="margin:6px 0 14px">How the active recommendation is built</h3>
+    <div class="kpiRibbon">
+      <div class="kpi"><strong id="evDest">88</strong><span>destruction input</span></div>
+      <div class="kpi"><strong id="evRecovery">84</strong><span>recovery input</span></div>
+      <div class="kpi"><strong id="evConfidence">78</strong><span>confidence input</span></div>
+      <div class="kpi"><strong id="evCircular">74</strong><span>circularity output</span></div>
+    </div>
+    <div class="whyBox" style="margin-top:14px">
+      <b>Evidence status:</b> all numeric pathway scores, confidence bands, and fluorine percentages are illustrative placeholders. Scientific references support qualitative mechanisms and design principles only. No site-specific efficiency, recovery, or compliance claim is made.
+    </div>
+  </div>
+
+  <div class="referencesPanel panel" id="references">
+    <div class="diagramHeader"><div><div class="eyebrow">Scientific references</div><h3>Evidence you can open and verify</h3></div><span class="tag">4 primary / technical sources</span></div>
+    <div class="referenceGrid">
+      <a class="referenceCard" href="https://www.epa.gov/system/files/documents/2024-04/pfas-npdwr_fact-sheet_treatment_4.8.24.pdf" target="_blank" rel="noopener noreferrer"><span class="refNum">01 · U.S. EPA</span><b>Treatment Options for Removing PFAS from Drinking Water</b><small>EPA fact sheet · April 2024</small><p>Established separation technologies and residual-stream management.</p><span class="refLink">Read source ↗</span></a>
+      <a class="referenceCard" href="https://pfas-1.itrcweb.org/12-treatment-technologies/" target="_blank" rel="noopener noreferrer"><span class="refNum">02 · ITRC</span><b>PFAS Treatment Technologies</b><small>ITRC technical guidance · evolving resource</small><p>Field readiness, site-specific constraints, and emerging destruction pathways.</p><span class="refLink">Read source ↗</span></a>
+      <a class="referenceCard" href="https://doi.org/10.1021/acs.est.3c10617" target="_blank" rel="noopener noreferrer"><span class="refNum">03 · Peer-reviewed</span><b>The Need to Include a Fluorine Mass Balance</b><small>Environmental Science &amp; Technology · 2024</small><p>Why parent-compound disappearance alone cannot establish complete PFAS destruction.</p><span class="refLink">Read source ↗</span></a>
+      <a class="referenceCard" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8687045/" target="_blank" rel="noopener noreferrer"><span class="refNum">04 · Peer-reviewed</span><b>Managing PFAS in Membrane Concentrates</b><small>AWWA Water Science · 2021</small><p>Why RO/NF residual streams need additional treatment or secure management.</p><span class="refLink">Read source ↗</span></a>
+    </div>
+    <div class="modelBoundary"><b>How to read the evidence:</b> citations establish qualitative principles, not the demo’s numerical values. A production model would need technology-specific experimental data, comparable feed matrices, uncertainty intervals, and independent validation.</div>
+  </div>
+
+</section>
+
+<section id="history">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Scenario history</div><h2>Save and compare decisions</h2></div>
+    <p>Store scenarios during the session so judges can see how rankings change across use cases.</p>
+  </div>
+  <div class="historyGrid">
+    <div class="panel historyPanel">
+      <h3 style="margin-top:0">Saved scenarios</h3>
+      <div id="historyList" class="historyList"><div class="historyItem"><b>No saved scenarios yet</b><span>Run a scenario and click “Save scenario.”</span></div></div>
+    </div>
+    <div class="panel historyPanel">
+      <h3 style="margin-top:0">Why this matters</h3>
+      <div class="judgeGrid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="judgeCard"><div class="ico">🔁</div><h4>Different priorities, different winner</h4><p>There is no universal “best” technology, so the tool makes tradeoffs visible.</p></div>
+        <div class="judgeCard"><div class="ico">🧭</div><h4>Transparent decision support</h4><p>Users can inspect the reasons behind a ranking instead of accepting a black-box score.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="presentation">
+  <div class="sectionHead">
+    <div><div class="eyebrow">Presentation mode</div><h2>A judge-ready demo in under 3 minutes.</h2></div>
+    <p>One guided path shows the problem, a live scenario, the signature fluorine-fate view, technical depth, and the project’s limits.</p>
+  </div>
+  <div class="panel pitchPanel">
+    <div class="pitchTimeline">
+      <div class="pitchBeat"><strong>0:00–0:25 · Problem</strong><p>PFAS destruction is not the end of the story. Where does the fluorine go?</p></div>
+      <div class="pitchBeat"><strong>0:25–1:05 · Simulator</strong><p>Enter a scenario and show live treatment ranking + tradeoffs.</p></div>
+      <div class="pitchBeat"><strong>1:05–1:35 · Signature</strong><p>Open the Fluorine Passport and animated fate tracker.</p></div>
+      <div class="pitchBeat"><strong>1:35–2:20 · Depth</strong><p>Challenge the recommendation, AI explanation, evidence, and hardware digital twin.</p></div>
+      <div class="pitchBeat"><strong>2:20–2:55 · Finish</strong><p>Show deployment, accessibility, docs, and why this can matter beyond a hackathon.</p></div>
+    </div>
+    <div class="runRow">
+      <button class="btn primary" onclick="guidedDemo()">Run guided demo</button>
+      <button class="btn" onclick="openJudge()">Open 30-second judge view</button>
+      <button class="btn" onclick="exportReport()">Export sample report</button>
+    </div>
+  </div>
+</section>
+
+<footer>FluoroLoop • PFAS treatment decision engine • transparent modeling • fluorine-fate tracking • prototype values clearly labeled</footer>
+</div>
+
+
+<div id="deepDiveModal" class="deepDiveModal" role="dialog" aria-modal="true" aria-labelledby="deepTitle">
+  <div class="deepDiveCard">
+    <div class="eyebrow">Treatment deep dive</div>
+    <h2 id="deepTitle" style="font-size:36px;margin:7px 0 8px">Treatment</h2>
+    <p id="deepDesc" style="color:var(--muted);line-height:1.6"></p>
+    <div id="deepMetrics" class="deepDiveGrid"></div>
+    <div class="deepSource" id="deepSource"></div>
+    <div class="modelBoundary"><b>Prototype rule:</b> all displayed pathway scores and percentages are illustrative. The linked literature provides scientific context, not a validation of those numbers. Pilot data and measured fluorine mass balance would be needed for an actual engineering recommendation.</div>
+    <div class="modalActions"><button class="btn primary" onclick="closeDeepDive()">Close</button></div>
+  </div>
+</div>
+
+<div id="judgeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="judgeTitle">
+  <div class="modalCard">
+    <div class="eyebrow">Judge mode</div>
+    <h3 id="judgeTitle">FluoroLoop in 30 seconds</h3>
+    <p><b>Problem:</b> PFAS treatment is often discussed as “removal” or “destruction,” but that does not automatically explain where the fluorine ends up.</p>
+    <p><b>What FluoroLoop does:</b> It compares treatment pathways, ranks them based on user priorities, then generates a Fluorine Passport showing recovery, inorganic fluoride, residual organofluorine, and uncertainty.</p>
+    <p><b>Why it is different:</b> It combines treatment comparison with fluorine fate and circularity instead of stopping at a single removal percentage. <strong>All numbers are illustrative;</strong> the AI and hardware sections are simulations, not connected systems.</p>
+    <div class="judgeProgress" aria-hidden="true"><i></i></div><div class="modalActions"><button class="btn primary" onclick="closeJudge()">Got it</button></div>
+  </div>
+</div>
+
+
+<div id="onboard" class="onboard">
+  <div class="onboardCard">
+    <div class="eyebrow">Welcome to FluoroLoop</div>
+    <h2 style="margin:8px 0 10px;font-size:42px">A PFAS treatment decision engine that follows the fluorine all the way through.</h2>
+    <p style="color:var(--muted);line-height:1.6">Explore a research-informed, interactive concept. Rankings and fluorine fractions are illustrative; the references explain the science, not the demo numbers.</p>
+    <div class="onboardSteps">
+      <div class="onboardStep"><b>1. Build a scenario</b><span>Choose PFAS, waste stream, and priorities.</span></div>
+      <div class="onboardStep"><b>2. Compare pathways</b><span>See rankings, tradeoffs, and circularity.</span></div>
+      <div class="onboardStep"><b>3. Follow the fluorine</b><span>Track recovery, fluoride, residuals, and uncertainty.</span></div>
+    </div>
+    <div class="actions" style="margin-top:0">
+      <button class="btn primary" onclick="startTour()">Enter FluoroLoop</button>
+      <button class="btn" onclick="openJudge();document.getElementById('onboard').classList.add('hide')">Judge Mode First</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const methods = [
+  {id:"electro",name:"Electrochemical Oxidation",tag:"Electrochemical",dest:88,energy:72,recovery:84,readiness:76,residual:78,confidence:78,cost:3,scalability:4,flow:[42,36,14,8],desc:"Electrical energy and reactive electrode surfaces drive PFAS breakdown."},
+  {id:"scwo",name:"Hydrothermal / SCWO",tag:"Hydrothermal",dest:96,energy:43,recovery:62,readiness:67,residual:86,confidence:84,cost:5,scalability:3,flow:[28,58,8,6],desc:"High-temperature, high-pressure water chemistry targets persistent fluorinated compounds."},
+  {id:"plasma",name:"Plasma Treatment",tag:"Plasma",dest:91,energy:51,recovery:55,readiness:58,residual:82,confidence:76,cost:4,scalability:3,flow:[21,63,10,6],desc:"Energetic reactive species attack persistent molecules in a plasma environment."},
+  {id:"thermal",name:"High-Temperature Treatment",tag:"Thermal",dest:93,energy:31,recovery:39,readiness:82,residual:73,confidence:72,cost:4,scalability:5,flow:[14,60,17,9],desc:"Intense heat can drive decomposition, with performance highly dependent on operating conditions."},
+  {id:"reductive",name:"Reductive UV / Sulfite",tag:"Reductive",dest:82,energy:68,recovery:73,readiness:52,residual:69,confidence:67,cost:2,scalability:3,flow:[34,35,20,11],desc:"Reducing chemistry targets difficult carbon–fluorine bonds under controlled conditions."},
+  {id:"mechano",name:"Mechanochemical Treatment",tag:"Mechanochemical",dest:86,energy:61,recovery:78,readiness:48,residual:72,confidence:65,cost:3,scalability:2,flow:[38,34,18,10],desc:"Mechanical energy and reactive solids promote PFAS transformation in a solid-state process."}
+];
+let ranked=[],active=null,history=[];
+
+function labels(){
+  wDestVal.textContent=wDest.value; wEnergyVal.textContent=wEnergy.value; wRecoveryVal.textContent=wRecovery.value; wReadinessVal.textContent=wReadiness.value;
+}
+function decisionScore(m){
+  const wd=+wDest.value/100,we=+wEnergy.value/100,wr=+wRecovery.value/100,wt=+wReadiness.value/100,total=wd+we+wr+wt||1;
+  let fit=0;
+  if(stream.value==="PFAS concentrate" && ["scwo","thermal","mechano"].includes(m.id)) fit+=2.5;
+  if(stream.value==="Contaminated water" && ["electro","plasma","reductive"].includes(m.id)) fit+=2;
+  if(pfas.value==="PFOS" && ["scwo","plasma"].includes(m.id)) fit+=1.5;
+  if(pfas.value==="PFOA" && ["electro","reductive"].includes(m.id)) fit+=1.5;
+  return ((m.dest*wd+m.energy*we+m.recovery*wr+m.readiness*wt)/total)+fit;
+}
+function circularityScore(m){
+  const [rec,ino,res,unc]=m.flow;
+  return Math.max(0,Math.min(100,Math.round((m.dest*.28)+(rec*.42)+(m.energy*.15)+(m.residual*.15)-(res*.12)-(unc*.15))));
+}
+
+function levelText(n){
+  return ["Very Low","Low","Medium","High","Very High"][Math.max(1,Math.min(5,n))-1];
+}
+function maturityText(readiness){
+  if(readiness>=80) return "Commercial";
+  if(readiness>=68) return "Demonstration";
+  if(readiness>=55) return "Pilot";
+  return "Research";
+}
+function renderScale(id,n){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.innerHTML=[1,2,3,4,5].map(i=>`<span class="${i<=n?'on':''}"></span>`).join("");
+}
+function radarCoords(m){
+  const vals=[m.dest,m.energy,m.recovery,m.readiness,m.residual,m.confidence];
+  const angles=[-90,-30,30,90,150,210];
+  return vals.map((v,i)=>{
+    const r=120*(v/100),a=angles[i]*Math.PI/180;
+    return [r*Math.cos(a),r*Math.sin(a)];
+  });
+}
+function renderRadar(m){
+  const pts=radarCoords(m);
+  if(!document.getElementById("radarShape")) return;
+  radarShape.setAttribute("points",pts.map(p=>p.join(",")).join(" "));
+  pts.forEach((p,i)=>{
+    const dot=document.getElementById("rp"+(i+1));
+    dot.setAttribute("cx",p[0]);dot.setAttribute("cy",p[1]);
+  });
+}
+function renderEconomics(m){
+  if(!document.getElementById("costLevel")) return;
+  costLevel.textContent=levelText(m.cost);
+  renderScale("costScale",m.cost);
+  const energyIntensity=Math.max(1,Math.min(5,Math.round((100-m.energy)/20)+1));
+  energyLevel.textContent=levelText(energyIntensity);
+  renderScale("energyScale",energyIntensity);
+  scaleLevel.textContent=levelText(m.scalability);
+  renderScale("scaleScale",m.scalability);
+  const maturityScore=m.readiness>=80?5:m.readiness>=68?4:m.readiness>=55?3:m.readiness>=45?2:1;
+  maturityLevel.textContent=maturityText(m.readiness);
+  renderScale("maturityScale",maturityScore);
+}
+function scoreWithWeights(m,weights){
+  const wd=weights.dest/100,we=weights.energy/100,wr=weights.recovery/100,wt=weights.readiness/100;
+  const total=wd+we+wr+wt||1;
+  let fit=0;
+  if(stream.value==="PFAS concentrate" && ["scwo","thermal","mechano"].includes(m.id)) fit+=2.5;
+  if(stream.value==="Contaminated water" && ["electro","plasma","reductive"].includes(m.id)) fit+=2;
+  if(pfas.value==="PFOS" && ["scwo","plasma"].includes(m.id)) fit+=1.5;
+  if(pfas.value==="PFOA" && ["electro","reductive"].includes(m.id)) fit+=1.5;
+  return ((m.dest*wd+m.energy*we+m.recovery*wr+m.readiness*wt)/total)+fit;
+}
+function challengeRecommendation(){
+  if(!active) run();
+  const original={dest:+wDest.value,energy:+wEnergy.value,recovery:+wRecovery.value,readiness:+wReadiness.value};
+  const currentWinner=ranked[0]?.id;
+  const keys=["dest","energy","recovery","readiness"];
+  const labelsMap={dest:"destruction",energy:"low-energy",recovery:"recovery",readiness:"readiness"};
+  let best=null;
+
+  for(const key of keys){
+    for(const dir of [-1,1]){
+      for(let delta=5;delta<=60;delta+=5){
+        const trial={...original};
+        trial[key]=Math.max(0,Math.min(100,trial[key]+dir*delta));
+        const rr=methods.map(m=>({m,score:scoreWithWeights(m,trial)})).sort((a,b)=>b.score-a.score);
+        if(rr[0].m.id!==currentWinner){
+          const cand={key,dir,delta,trial,newWinner:rr[0].m,newScore:rr[0].score,oldScore:scoreWithWeights(active,trial)};
+          if(!best || cand.delta<best.delta) best=cand;
+          break;
+        }
+      }
+    }
+  }
+
+  if(!best){
+    challengeResult.innerHTML="<strong>Recommendation remained stable.</strong> No single priority shift up to ±60 points changed the winner.";
+  } else {
+    const from=original[best.key],to=best.trial[best.key];
+    const verb=to>from?"rises":"falls";
+    challengeResult.innerHTML=`<strong>${best.newWinner.name}</strong> becomes the preferred pathway when <strong>${labelsMap[best.key]} priority ${verb} from ${from}% to ${to}%</strong>. That is the smallest single-variable shift found in this demo stress test.`;
+  }
+
+  sensitivityGrid.innerHTML=keys.map(key=>{
+    const plus={...original,[key]:Math.min(100,original[key]+10)};
+    const minus={...original,[key]:Math.max(0,original[key]-10)};
+    const plusWinner=methods.map(m=>({m,score:scoreWithWeights(m,plus)})).sort((a,b)=>b.score-a.score)[0].m.name;
+    const minusWinner=methods.map(m=>({m,score:scoreWithWeights(m,minus)})).sort((a,b)=>b.score-a.score)[0].m.name;
+    return `<div class="sensCard"><b>${labelsMap[key]}</b><span>−10 → ${minusWinner}<br>+10 → ${plusWinner}</span></div>`;
+  }).join("");
+}
+
+
+function setPrompt(t){document.getElementById('aiPrompt').value=t}
+function currentContext(){
+  if(!active) return {};
+  return {
+    pfas:pfas.value,stream:stream.value,concentration:+conc.value,volume:+vol.value,
+    recommended:active.name,
+    decisionScore:Math.round(active.simScore||decisionScore(active)),
+    circularity:active.circ??circularityScore(active),
+    metrics:{destruction:active.dest,lowEnergy:active.energy,recovery:active.recovery,readiness:active.readiness,residualControl:active.residual,confidence:active.confidence},
+    fluorineFate:{recoverable:active.flow[0],inorganicFluoride:active.flow[1],residualOrganofluorine:active.flow[2],uncertain:active.flow[3]}
+  };
+}
+function askCopilot(){
+  const q=aiPrompt.value.trim().toLowerCase();
+  const c=currentContext();
+  if(!c.recommended){aiAnswer.textContent='Run a scenario first.';return}
+  const weak=weakestMetric(active),strong=strongestMetric(active);
+  let ans='';
+  if(q.includes('why')&&q.includes('win')) ans=`${c.recommended} wins because it best matches the priorities you selected. Its strongest dimension is ${strong[0].toLowerCase()} (${strong[1]}/100), while its main tradeoff is ${weak[0].toLowerCase()} (${weak[1]}/100). The deterministic engine chose the method; the AI layer only explains the result.`;
+  else if(q.includes('tradeoff')) ans=`The clearest tradeoff is ${weak[0]} at ${weak[1]}/100. That is the main limitation to watch before a real engineering decision.`;
+  else if(q.includes('another')||q.includes('challenge')) ans='Use Challenge the Recommendation in the simulator. It finds the smallest priority shift that changes the winning treatment.';
+  else if(q.includes('simple')||q.includes('chemistry')) ans=`FluoroLoop thinks ${c.recommended} is the best fit for what you care about right now. It also shows ${c.fluorineFate.recoverable}% recoverable fluorine and ${c.fluorineFate.uncertain}% uncertainty in this demo scenario.`;
+  else ans=`For this ${c.pfas} scenario, ${c.recommended} has a decision score of ${c.decisionScore} and circularity score of ${c.circularity}.`;
+  aiAnswer.textContent=ans;
+  contextPacket.textContent=JSON.stringify(c,null,2);
+}
+function applyNaturalLanguage(){
+  const q=aiPrompt.value.toLowerCase();
+  if(q.includes('recovery')) wRecovery.value=100;
+  if(q.includes('low energy')||q.includes('energy')) wEnergy.value=95;
+  if(q.includes('destruction')) wDest.value=100;
+  if(q.includes('ready')||q.includes('deployment')||q.includes('commercial')) wReadiness.value=100;
+  labels();run();askCopilot();showToast('Natural-language instruction applied.');
+}
+function updateHardware(){
+  fluorideV.textContent=(+fluoride.value).toFixed(1);
+  tempV.textContent=temp.value;
+  phV.textContent=(+ph.value).toFixed(1);
+  flowV.textContent=(+flow.value).toFixed(1);
+  const alerts=[];
+  if(+temp.value>80) alerts.push('high temperature');
+  if(+ph.value<4||+ph.value>10) alerts.push('extreme pH');
+  if(+flow.value<1) alerts.push('very low flow');
+  if(alerts.length){qualityState.textContent='CHECK';hwAlert.textContent='Simulated alert: '+alerts.join(', ')+'.';}
+  else{qualityState.textContent='GOOD';hwAlert.textContent='All simulated process values are within the demo monitoring range.';}
+}
+function toggleA11y(){
+  document.body.classList.toggle('a11y');
+  showToast(document.body.classList.contains('a11y')?'Accessibility mode enabled.':'Accessibility mode disabled.');
+}
+
+
+function openDeepDive(id){
+  const m=methods.find(x=>x.id===id);
+  if(!m)return;
+  deepTitle.textContent=m.name;
+  deepDesc.textContent=m.desc;
+  const circ=circularityScore(m);
+  deepMetrics.innerHTML=[
+    ["Destruction",m.dest+"/100"],
+    ["Low-energy performance",m.energy+"/100"],
+    ["Recovery potential",m.recovery+"/100"],
+    ["Technology readiness",m.readiness+"/100"],
+    ["Residual control",m.residual+"/100"],
+    ["Confidence",m.confidence+"/100"],
+    ["Circularity",circ+"/100"],
+    ["Fluorine fate",`${m.flow[0]}% recoverable · ${m.flow[1]}% inorganic · ${m.flow[2]}% residual · ${m.flow[3]}% uncertain`]
+  ].map(x=>`<div class="deepItem"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("");
+  const ev=methodEvidence[m.id];
+  deepSource.innerHTML=`<b>Research context:</b> ${ev.summary} <a href="${ev.url}" target="_blank" rel="noopener noreferrer">${ev.name} ↗</a><br><small>Reference supports the qualitative description only, not the scores above.</small>`;
+  deepDiveModal.classList.add("show");
+}
+function closeDeepDive(){deepDiveModal.classList.remove("show")}
+function validateInputs(){
+  let ok=true, messages=[];
+  const cv=Number(conc.value),vv=Number(vol.value);
+  if(!Number.isFinite(cv)||cv<=0||cv>1000000){conc.value=1;ok=false;messages.push("concentration reset to 1 µg/L (valid range: >0 to 1,000,000)");}
+  if(!Number.isFinite(vv)||vv<=0||vv>1000000000){vol.value=1;ok=false;messages.push("volume reset to 1 L (valid range: >0 to 1 billion)");}
+  return {ok,messages};
+}
+function runSelfCheck(){
+  const v=validateInputs();
+  const fractionChecks=methods.every(m=>m.flow.length===4&&m.flow.every(x=>Number.isFinite(x)&&x>=0)&&m.flow.reduce((a,b)=>a+b,0)===100);
+  const rankCheck=ranked.length===methods.length && new Set(ranked.map(m=>m.id)).size===methods.length && ranked.every(m=>Number.isFinite(m.simScore));
+  const interfaceCheck=['winner','decisionScore','circularScore','methodGrid','tripleCompare','passportMethod','caseOutput','references'].every(id=>!!document.getElementById(id));
+  const sourceCheck=document.querySelectorAll('#references a[href^="https://"]').length>=4;
+  const keyboardCheck=document.querySelectorAll('button').length>0 && document.querySelectorAll('button:not([disabled])').length>0;
+  const rows=[
+    ['Positive, finite input values',v.ok?'PASS':'CORRECTED'],
+    ['Illustrative fate fractions sum to 100%',fractionChecks?'PASS':'CHECK'],
+    ['Ranking returns 6 distinct finite results',rankCheck?'PASS':'CHECK'],
+    ['Core interface elements are present',interfaceCheck?'PASS':'CHECK'],
+    ['Scientific references are linked',sourceCheck?'PASS':'CHECK'],
+    ['Native keyboard-focusable controls exist',keyboardCheck?'PASS':'CHECK'],
+    ['Reduced-motion CSS is provided','SUPPORTED'],
+    ['Real AI API connected','RULE-BASED PREVIEW'],
+    ['Physical hardware fabricated','DIGITAL TWIN'],
+    ['Experimental validation','NOT PERFORMED']
+  ];
+  testList.innerHTML=rows.map(([a,b])=>`<div class="testRow"><span>${a}</span><b class="${b==='PASS'?'statusGood':'statusWarn'}">${b}</b></div>`).join('');
+  reportPreview.textContent=v.messages.length?'Input corrections: '+v.messages.join('; ')+'. Checks describe software behavior only.':'Software checks complete. Fate percentages are illustrative and total 100% by construction, not by measured fluorine recovery. No laboratory or field validation has been performed.';
+  showToast('Software self-check complete.');
+}
+function buildReportText(){
+  const c=currentContext();
+  const weak=active?weakestMetric(active):["N/A",0];
+  return `FLUOROLOOP ENGINEERING REPORT
+
+Scenario
+PFAS: ${c.pfas||"N/A"}
+Waste stream: ${c.stream||"N/A"}
+Concentration: ${c.concentration||"N/A"} µg/L
+Volume: ${c.volume||"N/A"} L
+
+Recommendation
+Method: ${c.recommended||"N/A"}
+Decision score: ${c.decisionScore??"N/A"}
+Circularity score: ${c.circularity??"N/A"}
+Primary tradeoff: ${weak[0]} (${weak[1]}/100)
+
+Fluorine Fate
+Recoverable: ${c.fluorineFate?.recoverable??"N/A"}%
+Inorganic fluoride: ${c.fluorineFate?.inorganicFluoride??"N/A"}%
+Residual organofluorine: ${c.fluorineFate?.residualOrganofluorine??"N/A"}%
+Uncertain: ${c.fluorineFate?.uncertain??"N/A"}%
+
+Model notes
+- Prototype values are illustrative placeholders.
+- Sources below support qualitative scientific context, NOT the numeric model scores.
+  - Fate percentages are illustrative and sum to 100% by construction; this is not a measured fluorine mass balance.
+  - The scenario may represent a hypothetical PFAS concentrate, not finished drinking water.
+  - FluoroLoop is an educational prototype, not regulatory or professional engineering advice.
+  - The copilot is rule-based, not a live AI API. The Field Node is a simulated digital twin.
+
+  Scientific references
+  EPA treatment: https://www.epa.gov/system/files/documents/2024-04/pfas-npdwr_fact-sheet_treatment_4.8.24.pdf
+  ITRC treatment: https://pfas-1.itrcweb.org/12-treatment-technologies/
+  Fluorine mass balance: https://doi.org/10.1021/acs.est.3c10617
+  Membrane concentrates: https://pmc.ncbi.nlm.nih.gov/articles/PMC8687045/
+`;
+}
+function exportReport(){
+  if(!active)run();
+  const text=buildReportText();
+  reportPreview.textContent="Report generated. It includes scenario inputs, recommendation, fluorine fate, tradeoffs, and model limitations.";
+  try{
+    const blob=new Blob([text],{type:"text/plain"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;a.download="FluoroLoop_Engineering_Report.txt";
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),500);
+    showToast("Engineering report exported.");
+  }catch(e){showToast("Report preview generated.");}
+}
+
+function strongestMetric(m){
+  const pairs=[["Destruction",m.dest],["Low energy",m.energy],["Recovery",m.recovery],["Readiness",m.readiness],["Residual control",m.residual],["Confidence",m.confidence]].sort((a,b)=>b[1]-a[1]);
+  return pairs[0];
+}
+function weakestMetric(m){
+  const pairs=[["Destruction",m.dest],["Low energy",m.energy],["Recovery",m.recovery],["Readiness",m.readiness],["Residual control",m.residual],["Confidence",m.confidence]].sort((a,b)=>a[1]-b[1]);
+  return pairs[0];
+}
+function run(){
+  validateInputs();
+  ranked=methods.map(m=>({...m,simScore:decisionScore(m),circ:circularityScore(m)})).sort((a,b)=>b.simScore-a.simScore);
+  active=ranked[0];
+  renderWinner(active); renderCards(); renderTriple(); updatePassport(active);pulseResult();
+  showToast("Illustrative scenario recalculated.");
+}
+function renderWinner(m){
+  const low=Math.max(0,m.confidence-6), high=Math.min(100,m.confidence+6);
+  if(document.getElementById('rangeLabel')) rangeLabel.textContent=`${low}–${high}`;
+  if(document.getElementById('rangeBand')){ rangeBand.style.left=low+'%'; rangeBand.style.width=(high-low)+'%'; rangeDot.style.left=m.confidence+'%'; }
+  const weights=[['Destruction',+wDest.value],['Low energy',+wEnergy.value],['Recovery',+wRecovery.value],['Readiness',+wReadiness.value]].sort((a,b)=>b[1]-a[1]);
+  if(document.getElementById('changeExplain')) changeExplain.textContent=`${weights[0][0]} and ${weights[1][0]} are carrying the most weight in this scenario.`;
+
+  const s=Math.round(m.simScore||decisionScore(m)),c=m.circ??circularityScore(m);
+  winner.textContent=m.name; winnerText.textContent=`${m.name} ranks highest under illustrative scores and your selected priorities. This is not a measured engineering recommendation.`;
+  score.textContent=s; document.getElementById('decisionScore').textContent=s; circularScore.textContent=c;
+  ring.style.background=`conic-gradient(var(--mint) 0 ${Math.min(100,s)}%, rgba(255,255,255,.07) ${Math.min(100,s)}% 100%)`;
+  [["md","mdV",m.dest],["me","meV",m.energy],["mr","mrV",m.recovery],["mt","mtV",m.readiness],["ms","msV",m.residual],["mc","mcV",m.confidence]].forEach(([bar,val,x])=>{document.getElementById(bar).style.width=x+"%";document.getElementById(val).textContent=x});
+  why.innerHTML=`<b>Why this method in the demo?</b> Illustrative destruction ${m.dest}, low-energy ${m.energy}, recovery ${m.recovery}, readiness ${m.readiness}. Calculated circularity index: ${c}. These are not experimental measurements.`;
+  uncertaintyText.textContent=m.confidence>=80?"Lower uncertainty relative to the other demo pathways.":m.confidence>=70?"Moderate uncertainty in the current demo model.":"Higher uncertainty in the current demo model.";
+  const strong=strongestMetric(m), weak=weakestMetric(m);
+  if(document.getElementById('bestStrength')){bestStrength.textContent=strong[0];bestStrengthSub.textContent=`${strong[1]}/100 is the strongest dimension for this pathway.`;}
+  if(document.getElementById('biggestTradeoff')){biggestTradeoff.textContent=weak[0];biggestTradeoffSub.textContent=`${weak[1]}/100 is the clearest tradeoff to watch.`;}
+  if(document.getElementById('winnerReason')){winnerReason.textContent=`#1 of ${methods.length}`;winnerReasonSub.textContent='Highest weighted fit for the priorities selected.';}
+  if(document.getElementById('storyWinner')){storyWinner.textContent=m.name;storyWinnerText.textContent=`Decision score ${s}; circularity ${c}. It currently offers the strongest fit for this scenario.`;}
+  if(document.getElementById('storyTradeoff')){storyTradeoff.textContent=weak[0];storyTradeoffText.textContent=`At ${weak[1]}/100, this is the main limitation FluoroLoop keeps visible.`;}
+  if(document.getElementById('storyFate')){storyFate.textContent=`${m.flow[0]}% recoverable`;storyFateText.textContent=`The model also tracks ${m.flow[1]}% inorganic fluoride and ${m.flow[2]}% residual organofluorine.`;}
+  if(document.getElementById('storyUncertainty')){storyUncertainty.textContent=`${m.flow[3]}% uncertain`;storyUncertaintyText.textContent='The model preserves the uncertain share instead of forcing false precision.';}
+  if(document.getElementById('evDest')){evDest.textContent=m.dest;evRecovery.textContent=m.recovery;evConfidence.textContent=m.confidence;evCircular.textContent=c;}
+  renderRadar(m);
+  renderEconomics(m);
+}
+function renderCards(){
+  methodGrid.innerHTML=ranked.map((m,i)=>`<div class="methodCard ${m.id===active.id?'selected':''}">
+    <span class="tag">#${i+1} · ${m.tag}</span>
+    <h4>${m.name}</h4><p>${m.desc}</p>
+    <div class="scoresMini"><div>Decision<b>${Math.round(m.simScore)}</b></div><div>Circularity<b>${m.circ}</b></div><div>Confidence<b>${m.confidence}</b></div></div>
+    <div class="runRow" style="margin-top:10px"><button class="btn small" onclick="inspect('${m.id}')">Load passport</button><button class="btn small" onclick="openDeepDive('${m.id}')">Deep dive</button></div>
+  </div>`).join("");
+}
+function renderTriple(){
+  tripleCompare.innerHTML=ranked.slice(0,3).map((m,i)=>`<div class="compareCard"><span class="tag">#${i+1}</span><h4>${m.name}</h4><div class="compareRow"><span>Decision score</span><b>${Math.round(m.simScore)}</b></div><div class="compareRow"><span>Circularity</span><b>${m.circ}</b></div><div class="compareRow"><span>Destruction</span><b>${m.dest}</b></div><div class="compareRow"><span>Recovery</span><b>${m.recovery}</b></div><div class="compareRow"><span>Energy</span><b>${m.energy}</b></div><div class="compareRow"><span>Readiness</span><b>${m.readiness}</b></div></div>`).join("");
+  if(document.getElementById('rankingBars')){
+    rankingBars.innerHTML=ranked.map(m=>`<div class="rankBar"><span>${m.name}</span><div class="rankTrack"><div style="width:${Math.min(100,Math.round(m.simScore))}%"></div></div><b>${Math.round(m.simScore)}</b></div>`).join("");
+  }
+}
+function inspect(id){active=methods.find(x=>x.id===id);active={...active,simScore:decisionScore(active),circ:circularityScore(active)};renderWinner(active);updatePassport(active);renderCards();showToast(`${active.name} loaded.`);go('fate')}
+function updatePassport(m){
+  const [r,i,o,u]=m.flow;
+  passportMethod.textContent=m.name; passportScenario.textContent=`${pfas.value} • ${stream.value.toLowerCase()} • ${conc.value} µg/L`;
+  pr.textContent=r+"%";pi.textContent=i+"%";po.textContent=o+"%";pu.textContent=u+"%";passportCircular.textContent=m.circ??circularityScore(m);
+  svgMethod.textContent=m.name.length>18?m.name.slice(0,18)+"…":m.name; svgRVal.textContent=r+"%";svgIVal.textContent=i+"%";svgOVal.textContent=o+"%";svgUVal.textContent=u+"%";
+  linkR.setAttribute("stroke-width",Math.max(6,r/2));linkI.setAttribute("stroke-width",Math.max(6,i/2));linkO.setAttribute("stroke-width",Math.max(5,o/1.7));linkU.setAttribute("stroke-width",Math.max(4,u/1.4));
+}
+function animateFlow(){["linkIn","linkR","linkI","linkO","linkU"].forEach((id,idx)=>{const e=document.getElementById(id),orig=e.style.opacity||"0.8";e.style.opacity="0";setTimeout(()=>e.style.opacity=orig,120+idx*120)})}
+function preset(type){
+  if(type==="destruction"){wDest.value=100;wEnergy.value=25;wRecovery.value=55;wReadiness.value=45;stream.value="PFAS concentrate"}
+  if(type==="recovery"){wDest.value=80;wEnergy.value=45;wRecovery.value=100;wReadiness.value=45;stream.value="Contaminated water"}
+  if(type==="energy"){wDest.value=70;wEnergy.value=100;wRecovery.value=60;wReadiness.value=55;stream.value="Contaminated water"}
+  if(type==="deployment"){wDest.value=75;wEnergy.value=40;wRecovery.value=45;wReadiness.value=100;stream.value="PFAS concentrate"}
+  labels();run();challengeRecommendation();
+  showToast('Preset loaded. Scores remain illustrative.');
+}
+function pulseResult(){const rp=document.querySelector('.results');if(!rp)return;rp.classList.remove('is-updating');void rp.offsetWidth;rp.classList.add('is-updating');}
+function revealPassport(){const p=document.querySelector('.passport');if(!p)return;p.classList.remove('passport-reveal');void p.offsetWidth;p.classList.add('passport-reveal');}
+function animateNumber(el,to,suffix=''){
+  if(!el)return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=to+suffix;return}
+  const from=parseFloat(el.textContent)||0,start=performance.now(),dur=480;
+  function tick(t){const p=Math.min(1,(t-start)/dur),e=1-Math.pow(1-p,3);el.textContent=Math.round(from+(to-from)*e)+suffix;if(p<1)requestAnimationFrame(tick)}
+  requestAnimationFrame(tick);
+}
+function animateFlow(){
+  const ids=['linkIn','linkR','linkI','linkO','linkU'];
+  ids.forEach(id=>document.getElementById(id)?.classList.remove('flowing'));
+  ids.forEach((id,idx)=>setTimeout(()=>{const e=document.getElementById(id);if(!e)return;e.classList.add('flowing');setTimeout(()=>e.classList.remove('flowing'),1050)},idx*170));
+}
+function loadCaseStudy(){
+  pfas.value='PFOA';stream.value='PFAS concentrate';conc.value='250';vol.value='1000';
+  wDest.value='90';wEnergy.value='45';wRecovery.value='70';wReadiness.value='70';
+  labels();run();challengeRecommendation();
+  caseOutput.innerHTML='<strong>Example loaded.</strong> The model currently ranks <b>'+active.name+'</b> highest under the chosen demo weights. This is not a measured treatment outcome. Use the Fluorine Passport to see a hypothetical accounting framework.';
+  go('simulator');
+}
+const methodEvidence={
+ electro:{summary:'Electrochemical oxidation is an emerging destructive pathway; matrix chemistry, electrode choice, byproducts and fluoride release must be evaluated.',url:'https://pfas-1.itrcweb.org/12-treatment-technologies/',name:'ITRC treatment guidance'},
+ scwo:{summary:'Supercritical water oxidation applies high temperature and pressure to break down PFAS-containing streams. Materials, salts, and byproducts matter.',url:'https://pfas-1.itrcweb.org/1-6-priority-topics-treatment-technologies/',name:'ITRC priority treatment topics'},
+ plasma:{summary:'Plasma treatment is an emerging destruction pathway. Results depend on reactor configuration, the treated matrix and operating conditions.',url:'https://pfas-1.itrcweb.org/12-treatment-technologies/',name:'ITRC treatment guidance'},
+ thermal:{summary:'Thermal treatment performance depends on temperatures, residence time, mixing, off-gas treatment, and the treated waste.',url:'https://pfas-1.itrcweb.org/12-treatment-technologies/',name:'ITRC treatment guidance'},
+ reductive:{summary:'UV/sulfite systems are under investigation for reductive defluorination, with strong dependence on water chemistry and treatment conditions.',url:'https://pfas-1.itrcweb.org/12-treatment-technologies/',name:'ITRC treatment guidance'},
+ mechano:{summary:'Mechanochemical degradation is an emerging treatment for certain PFAS-containing solid or concentrated streams, with scale-up and fate-verification questions.',url:'https://pfas-1.itrcweb.org/12-treatment-technologies/',name:'ITRC treatment guidance'}
+};
+
+function saveScenario(){
+  if(!active)run();
+  history.unshift({name:active.name,pfas:pfas.value,stream:stream.value,score:Math.round(active.simScore),circ:active.circ??circularityScore(active)});
+  history=history.slice(0,5);
+  historyList.innerHTML=history.map((h,i)=>`<div class="historyItem"><b>${i+1}. ${h.name}</b><span>${h.pfas} • ${h.stream} • decision ${h.score} • circularity ${h.circ}</span></div>`).join("");
+  showToast("Scenario saved.");
+}
+function startTour(){document.getElementById('onboard').classList.add('hide');setDemoStep(1);go('simulator');}
+function setDemoStep(n){
+  [1,2,3,4].forEach(i=>document.getElementById('demo'+i)?.classList.toggle('active',i===n));
+}
+function guidedDemo(){
+  preset('recovery');
+  setDemoStep(1);
+  setTimeout(()=>{setDemoStep(2);go('compare')},900);
+  setTimeout(()=>{setDemoStep(3);go('fate');animateFlow()},1800);
+  setTimeout(()=>{setDemoStep(4);go('evidence')},2800);
+  setTimeout(()=>{go('story');showToast('Guided demo complete.')},3800);
+}
+function randomScenario(){
+  const pf=["PFOA","PFOS","GenX","Mixed PFAS"];
+  const st=["Contaminated water","PFAS concentrate","Landfill leachate","AFFF-derived waste"];
+  pfas.value=pf[Math.floor(Math.random()*pf.length)];
+  stream.value=st[Math.floor(Math.random()*st.length)];
+  conc.value=[50,100,250,500,1000][Math.floor(Math.random()*5)];
+  vol.value=[500,1000,5000,10000][Math.floor(Math.random()*4)];
+  wDest.value=Math.floor(50+Math.random()*51);
+  wEnergy.value=Math.floor(30+Math.random()*71);
+  wRecovery.value=Math.floor(40+Math.random()*61);
+  wReadiness.value=Math.floor(35+Math.random()*66);
+  labels();run();challengeRecommendation();showToast('Random scenario generated.');
+}
+function openJudge(){judgeModal.classList.add("show")}function closeJudge(){judgeModal.classList.remove("show")}
+function showToast(msg){toast.textContent=msg;toast.classList.add("show");clearTimeout(window.tt);window.tt=setTimeout(()=>toast.classList.remove("show"),2200)}
+function go(id,btn){const el=document.getElementById(id);if(!el)return;el.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});el.classList.add('reveal');if(btn){document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}}
+labels();run();challengeRecommendation();updateHardware();
+// Keep all sections visible immediately for reliable mobile use, screen readers, and full-page previews.
+</script>
+</body>
+</html>
